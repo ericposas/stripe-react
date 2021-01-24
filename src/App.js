@@ -132,33 +132,46 @@ export function Checkout () {
 
   const [products, setProducts] = React.useState(null)
 
-  React.useEffect(async () => {
+  React.useEffect(() => {
 
-    // let response = await fetch('/get-list-of-products', {
-    //   method: 'GET'
-    // })
-    // let _products = await response.json()
-
-    fetch('/get-list-of-products', {
+    let response = fetch('/get-list-of-products', {
       method: 'GET'
     })
-    .then(response => {
-      response.json()
-      .then(data => {
-        console.log(data.products[0])
-        setProducts(data.products)
-      })
-    })
+    .then(response => response.json())
     .catch(err => console.log(err))
     
-    
-    // setProducts(
-    //   _products.products
-    // )
-    
-    // console.log(
-    //   _products
-    // )
+    response
+    .then(data => {
+      setProducts(data.products)
+    })
+    .catch(err => console.log(err))
+
+    // if (localStorage.getItem('membership-app')) {
+    //   let data = JSON.parse(localStorage.getItem('membership-app'))
+    //   setProducts(data.products)
+    //   console.log(
+    //     data
+    //   )
+    // } else {
+    //   console.log(
+    //     'no localStorage data'
+    //   )
+    //   let response = fetch('/get-list-of-products', {
+    //     method: 'GET'
+    //   })
+    //   .then(response => response.json())
+    //   .catch(err => console.log(err))
+      
+    //   response
+    //   .then(data => {
+    //     // console.log(data.products[0])
+    //     setProducts(data.products)
+    //     localStorage.setItem('membership-app', JSON.stringify({
+    //       products: data.products
+    //     }))
+    //   })
+    //   .catch(err => console.log(err))
+    // }
 
   }, [])
 
@@ -186,36 +199,45 @@ export function Checkout () {
     
   // }, [])
 
-  const decrementItem = item => {
-    console.log(
-      item
-    )
-  }
+  // const decrementItem = item => {
+  //   console.log(
+  //     item
+  //   )
+  // }
 
   const handleClick = async event => {
-    // Get Stripe.js instance
-    const stripe = await stripePromise
-    // Call your backend to create the Checkout Session
-    const response = await fetch('/create-checkout-session', {
-      method: 'POST',
-      body: JSON.stringify({
-        line_items: shoppingCart
-      }),
-      headers: {
-        'Content-Type': 'application/json'
+
+    if (shoppingCart.length > 0) {
+
+      // Get Stripe.js instance
+      const stripe = await stripePromise
+      // Call your backend to create the Checkout Session
+      const response = await fetch('/create-checkout-session', {
+        method: 'POST',
+        body: JSON.stringify({
+          line_items: shoppingCart
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const session = await response.json()
+      // When the customer clicks on the button, redirect them to the Checkout 
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id
+      })
+  
+      if (result.error) {
+        // If `redirectToCheckout` fails due to a browser or network
+        // error, display the localized error message to your customer
+        // using `result.error.message`.
+  
       }
-    })
-    const session = await response.json()
-    // When the customer clicks on the button, redirect them to the Checkout 
-    const result = await stripe.redirectToCheckout({
-      sessionId: session.id
-    })
 
-    if (result.error) {
-      // If `redirectToCheckout` fails due to a browser or network
-      // error, display the localized error message to your customer
-      // using `result.error.message`.
-
+    } else {
+      console.log(
+        'there is nothing in your shopping cart'
+      )
     }
 
   }

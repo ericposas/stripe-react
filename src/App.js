@@ -69,66 +69,7 @@ function SuccessPage () {
   )
 }
 
-// function Item () {
-//   return (
-//     <>
-//       <div>
-
-//       </div>
-//     </>
-//   )
-// }
-
-
-
 export function Checkout () {
-
-  // shape of line_item
-  // {
-  //   price_data: {
-  //       currency: 'usd',
-  //       product_data: {
-  //           name: 'Camisa',
-  //       },
-  //       unit_amount: 2500
-  //   },
-  //   quantity: 2,
-  // }
-
-  // const [cart, setCart] = React.useState([])
-  // const [itemTypesInCart, setItemTypesInCart] = React.useState({})
-
-  // const incrementItem = item => {
-
-  //   let { price_data: { product_data : { name } } } = item
-  //   let itemInCart = false
-  //   cart.forEach(_item => {
-  //     if (isEqual(item, _item))
-  //     itemInCart = true
-  //   })
-  //   if (itemInCart) {
-  //     let itemCp = {}
-  //     itemCp = Object.assign(itemCp, item)
-  //     itemCp.quantity += itemTypesInCart[name]
-  //     console.log(
-  //       itemCp
-  //     )
-  //     setCart(cart => [...cart, item])
-  //   } else {
-  //     setCart(cart => [...cart, item])
-  //   }
-
-  //   setItemTypesInCart({
-  //     ...itemTypesInCart,
-  //     [name]: itemTypesInCart[name] ? itemTypesInCart[name] + 1 : 1
-  //   })
-
-  //   console.log(
-  //     itemTypesInCart,
-  //     cart
-  //   )
-
-  // }
 
   const [products, setProducts] = React.useState(null)
 
@@ -146,64 +87,7 @@ export function Checkout () {
     })
     .catch(err => console.log(err))
 
-    // if (localStorage.getItem('membership-app')) {
-    //   let data = JSON.parse(localStorage.getItem('membership-app'))
-    //   setProducts(data.products)
-    //   console.log(
-    //     data
-    //   )
-    // } else {
-    //   console.log(
-    //     'no localStorage data'
-    //   )
-    //   let response = fetch('/get-list-of-products', {
-    //     method: 'GET'
-    //   })
-    //   .then(response => response.json())
-    //   .catch(err => console.log(err))
-      
-    //   response
-    //   .then(data => {
-    //     // console.log(data.products[0])
-    //     setProducts(data.products)
-    //     localStorage.setItem('membership-app', JSON.stringify({
-    //       products: data.products
-    //     }))
-    //   })
-    //   .catch(err => console.log(err))
-    // }
-
   }, [])
-
-  // React.useEffect(async () => {
-
-  //   let list = productsList()
-  //   console.log(list)
-
-  //   for (let prod_id of list) {
-  //     let response = await fetch('/get-products', {
-  //       method: 'POST',
-  //       body: JSON.stringify({
-  //         prod_id: prod_id
-  //       }),
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       }
-  //     })
-  
-  //     let details = await response.json()
-  //     console.log(
-  //       details
-  //     )
-  //   }
-    
-  // }, [])
-
-  // const decrementItem = item => {
-  //   console.log(
-  //     item
-  //   )
-  // }
 
   const handleClick = async event => {
 
@@ -231,7 +115,6 @@ export function Checkout () {
         // If `redirectToCheckout` fails due to a browser or network
         // error, display the localized error message to your customer
         // using `result.error.message`.
-  
       }
 
     } else {
@@ -242,25 +125,6 @@ export function Checkout () {
 
   }
 
-  // const getProducts = async () => {
-  //   let response = await fetch('/get-products', {
-  //     method: 'GET'
-  //   })
-  //   .json()
-  //   return response
-  // }
-
-  // const convertToDollar = priceNum => {
-  //   let amt = priceNum.toString()
-  //   let dollarAmt = amt.split('')
-  //   dollarAmt.pop()
-  //   dollarAmt.pop()
-  //   dollarAmt.push('.00')
-  //   dollarAmt.join('')
-  //   return dollarAmt
-  // }
-
-  // const [checked, setChecked] = React.useState(false)
   const [itemsChecked, setItemsChecked] = React.useState({})
   const [shoppingCart, setShoppingCart] = React.useState([])
 
@@ -292,10 +156,6 @@ export function Checkout () {
       ))
     }
 
-    console.log(
-      shoppingCart
-    )
-
   }
 
   return (
@@ -313,8 +173,6 @@ export function Checkout () {
             <>
               <div
               style={{
-                // 'display': 'flex',
-                // 'text-align': 'center',
                 'alignItems': 'center',
                 'border': '1px solid #ccc',
                 'borderRadius': '3px',

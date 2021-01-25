@@ -1,8 +1,9 @@
 import React from 'react'
-import style from './Success.css'
+import './Success.css'
 import { useLocation } from 'react-router-dom'
 import validator from 'validator'
 import { isEqual } from 'lodash'
+import StyledButton from './components/StyledButton'
 
 export default function SuccessPage () {
 
@@ -11,7 +12,7 @@ export default function SuccessPage () {
     const handleSubmit = (event) => {
         event.preventDefault()
         // send data to an endpoint to store student info
-        
+
     }
 
     const [firstNameField, setFirstNameField] = React.useState('')
@@ -65,7 +66,9 @@ export default function SuccessPage () {
             Payment was successful! Please finish setting up your profile
         </div>
         <br />
-        <form onSubmit={handleSubmit}>
+        <form
+        className={'Success_form'}
+        onSubmit={handleSubmit}>
             <label htmlFor='first-name'>First name: &nbsp;</label>
             <input
             id='first-name' type='text'
@@ -150,9 +153,17 @@ export default function SuccessPage () {
             <br />
             {
                 allFieldsValid() ?
-                <button type='submit' role='button'>
+                <StyledButton
+                style={{
+                    'left': 0,
+                    'right': 0,
+                    'bottom': '40px',
+                    'position': 'absolute',
+                    'margin': 'auto'
+                }}
+                type='submit' role='button'>
                     Complete Enrollment
-                </button>
+                </StyledButton>
                 : null
             }
         </form>

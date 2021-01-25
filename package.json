@@ -14,14 +14,24 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
     "stripe": "^8.132.0",
+    "styled-components": "^5.2.1",
     "validator": "^13.5.2",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
+    "watch": "npm-watch",
     "start": "react-scripts start",
-    "build": "react-scripts build && robocopy ./build ../stripe-server/public /s /e",
+    "build": "react-scripts build && robocopy ./build ../stripe-server/public /e && exit 0",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "js,jsx,css"
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -40,5 +50,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "npm-watch": "^0.7.0"
   }
 }

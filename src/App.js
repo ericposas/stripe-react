@@ -13,6 +13,8 @@ import './App.css'
 import productsList from './productsList'
 import validator from 'validator'
 import SuccessPage from './Success'
+import StyledButton from './components/StyledButton'
+import ProductBox from './components/ProductBox'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
 
@@ -154,7 +156,7 @@ export function Checkout () {
     <>
       <br />
       <div>
-        Stripe Testing Checkout
+        Enrollment
       </div>
       <br />
       <div>
@@ -162,65 +164,28 @@ export function Checkout () {
           products ?
           products
           .map(product => (
-            <>
-              <div
-              style={{
-                'alignItems': 'center',
-                'border': '1px solid #ccc',
-                'borderRadius': '3px',
-                'padding': '20px',
-                'width': '300px',
-                'position': 'absolute',
-                'margin': 'auto',
-                'left': 0,
-                'right': 0
-              }}
-              >
-                <span>
-                  <div key={product.id}>
-                    { product.name }
-                  </div>
-                  <div>
-                    { product.statement_descriptor }
-                  </div>
-                  <div>
-                    ${ convertToDollar( product.metadata.price ) }
-                  </div>
-                  <input
-                  type='checkbox'
-                  checked={itemsChecked[product.id]}
-                  onChange={() => { updateCart(product) }}
-                  />
-                </span>
-                <img
-                style={{
-                  'width': '100px'
-                }}
-                src={ product.images[0] }
-                />                
-              </div>
-            </>
+            <ProductBox
+            itemsChecked={itemsChecked}
+            updateCart={updateCart}
+            product={product}
+            />
           ))
           : null
         }
       </div>
       <br />
-      <button
+      <StyledButton
       style={{
-        'padding': '20px',
-        'border': 'none',
-        'borderRadius': '2px',
-        'bottom': '40px',
-        'position': 'absolute',
         'left': 0,
         'right': 0,
-        'width': '120px',
+        'bottom': '40px',
+        'position': 'absolute',
         'margin': 'auto'
       }}
       type='button' role='link'
       onClick={handleClick}>
         Checkout
-      </button>
+      </StyledButton>
     </>
   )
 }

@@ -4,12 +4,15 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
+  useLocation
 } from 'react-router-dom'
 import itemsList from './itemsList'
 import { forEach, isEqual } from 'lodash'
 import './App.css'
 import productsList from './productsList'
+import validator from 'validator'
+import SuccessPage from './Success'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
 
@@ -56,17 +59,6 @@ export const convertToDollar = priceNum => {
   dollarAmt.push('.00')
   dollarAmt = dollarAmt.join('')
   return dollarAmt
-}
-
-function SuccessPage () {
-  return (
-    <>
-      <br />
-      <div>
-        Payment was successful!
-      </div>
-    </>
-  )
 }
 
 export function Checkout () {

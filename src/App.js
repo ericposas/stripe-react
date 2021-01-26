@@ -1,50 +1,120 @@
 import React from 'react'
-import { loadStripe } from '@stripe/stripe-js'
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Link,
-  useLocation
+  useHistory
 } from 'react-router-dom'
-import itemsList from './itemsList'
-import { forEach, isEqual } from 'lodash'
 import './App.css'
-import productsList from './productsList'
-import validator from 'validator'
 import SuccessPage from './Success'
 import StyledButton from './components/StyledButton'
-import ProductBox from './components/ProductBox'
+import styled from 'styled-components'
+import { useAuth0 } from '@auth0/auth0-react'
+import Checkout from './components/Checkout'
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
+const Header = styled.h3`
+padding: 20px 0 20px 0;
+background-color: slateblue;
+color: #fff;
+cursor: pointer;
+`
+
+function LogUser () {
+  const { user } = useAuth0()
+  React.useEffect(() => {
+    console.log(
+      user
+    )
+  }, [])
+  return <></>
+}
 
 function App() {
+
+  const history = useHistory()
+  const { loginWithRedirect, isAuthenticated, isLoading, logout, user } = useAuth0()
 
   return (
     <div className='App'>
       <Router>
-        <div>
-          {/* <nav>
-            <ul>
-              <li>
-                <Link to='/'>Home</Link>
-              </li>
-              <li>
-                <Link to='/success'>Success</Link>
-              </li>
-            </ul>
-          </nav> */}
+        
+        <Link to='/' style={{ textDecoration: 'none' }}>
+          <Header>{ process.env.REACT_APP_WEB_APP_NAME }</Header>
+        </Link>
 
+        <div>
           <Switch>
+            <Route exact path='/'>
+              <>
+                <br />
+                {
+                  isLoading ?
+                  <div>Loading...</div>
+                  :
+                    isAuthenticated ?
+                      <>
+                        {
+                          user ?
+                          <>
+                            <h3>
+                              Welcome {user.name}
+                            </h3>
+                            <LogUser />
+                            {/* <h4>{user.email}</h4> */}
+                          </>
+                          : null
+                        }
+                        <div>
+                          Sign Up For Classes
+                        </div>
+                        <br />
+                        <Link to='/checkout'>
+                          <StyledButton>
+                            Enroll in Classes
+                          </StyledButton>
+                        </Link>
+                        <br />
+                        <br />
+                        <StyledButton
+                        onClick={() => logout({ returnTo: window.location.origin })}
+                        >
+                          Logout
+                        </StyledButton>
+                      </>
+                    :
+                      <>
+                        <div>Sign Up or Sign In</div><br />
+                        <StyledButton
+                        onClick={() => loginWithRedirect()}
+                        >
+                          Auth0 Login
+                        </StyledButton>
+                      </>
+                }
+              </>
+            </Route>
             <Route path='/success'>
               <SuccessPage />
             </Route>
-            <Route path='/'>
+            <Route path='/checkout'>
               <Checkout />
             </Route>
+            {/* {
+              isAuthenticated ?
+              <>
+                <Route path='/success'>
+                  <SuccessPage />
+                </Route>
+                <Route path='/checkout'>
+                  <Checkout />
+                </Route>
+              </>
+              : <GoBack />
+            } */}
           </Switch>
-
         </div>
+
       </Router>
     </div>
   )
@@ -53,141 +123,12 @@ function App() {
 
 export default App
 
-export const convertToDollar = priceNum => {
-  let amt = priceNum.toString()
-  let dollarAmt = amt.split('')
-  dollarAmt.pop()
-  dollarAmt.pop()
-  dollarAmt.push('.00')
-  dollarAmt = dollarAmt.join('')
-  return dollarAmt
-}
-
-export function Checkout () {
-
-  const [products, setProducts] = React.useState(null)
-
+function GoBack () {
+  const history = useHistory()
   React.useEffect(() => {
-
-    let response = fetch('/get-list-of-products', {
-      method: 'GET'
-    })
-    .then(response => response.json())
-    .catch(err => console.log(err))
-    
-    response
-    .then(data => {
-      setProducts(data.products)
-    })
-    .catch(err => console.log(err))
-
-  }, [])
-
-  const handleClick = async event => {
-
-    if (shoppingCart.length > 0) {
-
-      // Get Stripe.js instance
-      const stripe = await stripePromise
-      // Call your backend to create the Checkout Session
-      const response = await fetch('/create-checkout-session', {
-        method: 'POST',
-        body: JSON.stringify({
-          line_items: shoppingCart
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      const session = await response.json()
-      // When the customer clicks on the button, redirect them to the Checkout 
-      const result = await stripe.redirectToCheckout({
-        sessionId: session.id
-      })
-  
-      if (result.error) {
-        // If `redirectToCheckout` fails due to a browser or network
-        // error, display the localized error message to your customer
-        // using `result.error.message`.
-      }
-
-    } else {
-      console.log(
-        'there is nothing in your shopping cart'
-      )
-    }
-
-  }
-
-  const [itemsChecked, setItemsChecked] = React.useState({})
-  const [shoppingCart, setShoppingCart] = React.useState([])
-
-  const updateCart = product => {
-    setItemsChecked({
-      [product.id]: !itemsChecked[product.id]
-    })
-
-    let inCart = false
-    let itemToAdd = { price: product.metadata.price_id, quantity: 1 }
-    shoppingCart.forEach(item => {
-      if (isEqual(item, itemToAdd)) {
-        inCart = true
-      }
-    })
-
-    if (!inCart) {
-      setShoppingCart(() => ([
-        ...shoppingCart,
-        itemToAdd
-      ]))
-    } else {
-      setShoppingCart(() => (
-        shoppingCart.filter(item => {
-          if (!isEqual(item, itemToAdd)) {
-            return item
-          }
-        })
-      ))
-    }
-
-  }
-
-  return (
-    <>
-      <br />
-      <div>
-        Enrollment
-      </div>
-      <br />
-      <div>
-        {
-          products ?
-          products
-          .map(product => (
-            <ProductBox
-            itemsChecked={itemsChecked}
-            updateCart={updateCart}
-            product={product}
-            />
-          ))
-          : null
-        }
-      </div>
-      <br />
-      <StyledButton
-      style={{
-        'left': 0,
-        'right': 0,
-        'bottom': '40px',
-        'position': 'absolute',
-        'margin': 'auto'
-      }}
-      type='button' role='link'
-      onClick={handleClick}>
-        Checkout
-      </StyledButton>
-    </>
-  )
+    history.push('/')
+  })
+  return <></>
 }
 
 // -- line items: format -- 

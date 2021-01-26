@@ -1,6 +1,6 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
-import { Checkout, convertToDollar } from './App'
+import { convertToDollar } from './ProductBox'
 
 test('method convert to dollar should return a dollar-denoted string', () => {
     expect(

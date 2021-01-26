@@ -9,6 +9,7 @@ const StyledButton = styled.button`
     border: none;
     transition: all .35s;
     transform: scale(1.0);
+    cursor: pointer;
     &:hover {
         background-color: royalblue;
         transition: all .35s;

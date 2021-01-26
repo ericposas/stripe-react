@@ -79,6 +79,9 @@ export default function SuccessPage () {
                 .then(data => {
                     console.log(data)
                     statusCode = data.statusCode ? data.statusCode : null
+                    setTimeout(() => {
+                        history.push('/?profileSetup=complete')
+                    }, 1000)
                 })
                 .catch(err => {
                     // should we do another fetch to invalidate the jwt here in

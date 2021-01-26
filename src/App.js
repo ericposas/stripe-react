@@ -4,7 +4,8 @@ import {
   Switch,
   Route,
   Link,
-  useHistory
+  useHistory,
+  useLocation
 } from 'react-router-dom'
 import './App.css'
 import SuccessPage from './Success'
@@ -21,6 +22,7 @@ cursor: pointer;
 `
 
 function LogUser () {
+  // const history = useHistory()
   const { user } = useAuth0()
   React.useEffect(() => {
     console.log( user )
@@ -28,13 +30,65 @@ function LogUser () {
   return <></>
 }
 
-function App() {
+const ModalDiv = styled.div`
+color: white;
+padding: 10px 25px;
+border-radius: 3px;
+background-color: mediumseagreen;
+box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.2)
+`
 
+function SomethingSomethingComplete () {
+   
+  const [modal, setModal] = React.useState(false)
   const history = useHistory()
+  const location = useLocation()
+
+  React.useEffect(() => {
+    if (location) {
+      // let location = window.location
+      let search = location.search.substr(1, location.search.length)
+      let params = search.split('=')
+      if (params) {
+        let key = params[0]
+        let value = params[1]
+        if (key && value) {
+          console.log(key, value)
+          if (key === 'profileSetup') {
+            if (value === 'complete') {
+              setModal(true) // maybe replace this with react toast lib
+              setTimeout(() => {
+                history.push('/')
+                window.location.reload()
+              }, 2500)
+            }
+          }
+        }
+      }
+    }
+  }, [location])
+
+  return (
+    <>
+    {
+      modal ?
+        <>
+          <ModalDiv>
+            Thank you for completing your profile!
+          </ModalDiv>
+          <br />
+        </>
+      : null
+    }
+    </>
+  )
+}
+
+function App() {
+  
   const { loginWithRedirect, isAuthenticated, isLoading, logout, user } = useAuth0()
 
-  // const [jwt, setJwt] = React.useState(null)
-
+  
   React.useEffect(() => {
     
     if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
@@ -57,6 +111,12 @@ function App() {
     }
 
   }, [])
+
+  React.useEffect(() => {
+    // if user data has changed, then reload our view
+    // window.location.reload() // doesn't work, gets stuck in a render loop
+    //
+  }, [user])
 
   return (
     <div className='App'>
@@ -84,6 +144,8 @@ function App() {
             }
           </Header>
         </Link>
+
+        <SomethingSomethingComplete />
 
         <div>
           <Switch>

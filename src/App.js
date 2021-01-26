@@ -23,9 +23,7 @@ cursor: pointer;
 function LogUser () {
   const { user } = useAuth0()
   React.useEffect(() => {
-    console.log(
-      user
-    )
+    console.log( user )
   }, [])
   return <></>
 }
@@ -34,6 +32,31 @@ function App() {
 
   const history = useHistory()
   const { loginWithRedirect, isAuthenticated, isLoading, logout, user } = useAuth0()
+
+  // const [jwt, setJwt] = React.useState(null)
+
+  React.useEffect(() => {
+    
+    if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
+      fetch('/retrieve-api-token', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        localStorage.setItem('gym-app-jwt', JSON.stringify(data))
+        // we will update this to send the jwt to our mongo db for better security...
+        // we will then need to blacklist or invalidate old jwt tokens as well
+        // but for now, let's make a request using the jwt! (at Success component)
+        // request will be PATCH to update user 
+      })
+      .catch(err => console.log(err))
+    }
+
+  }, [])
 
   return (
     <div className='App'>
@@ -77,8 +100,11 @@ function App() {
                           user ?
                           <>
                             <h3>
-                              Welcome {user.name}
+                              Welcome { user.given_name && user.family_name ? `${user.given_name} ${user.family_name}` : user.name }
                             </h3>
+                            <h4>
+                              { user.name }
+                            </h4>
                             <LogUser />
                             {/* <h4>{user.email}</h4> */}
                           </>

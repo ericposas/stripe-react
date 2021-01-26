@@ -40,7 +40,26 @@ function App() {
       <Router>
         
         <Link to='/' style={{ textDecoration: 'none' }}>
-          <Header>{ process.env.REACT_APP_WEB_APP_NAME }</Header>
+          <Header>
+            { process.env.REACT_APP_WEB_APP_NAME }
+            {
+              isLoading ? <></> :
+                isAuthenticated ?
+                <StyledButton
+                  style={{ position: 'absolute', right: '14px', top: '7px', width: '120px', backgroundColor: 'royalblue' }}
+                  onClick={() => logout({ returnTo: window.location.origin })}
+                  >
+                  Logout
+                </StyledButton>
+              :
+                <StyledButton
+                  style={{ position: 'absolute', right: '14px', top: '7px', width: '120px', backgroundColor: 'royalblue' }}
+                  onClick={() => loginWithRedirect()}
+                >
+                  Auth0 Login
+                </StyledButton>
+            }
+          </Header>
         </Link>
 
         <div>
@@ -76,20 +95,10 @@ function App() {
                         </Link>
                         <br />
                         <br />
-                        <StyledButton
-                        onClick={() => logout({ returnTo: window.location.origin })}
-                        >
-                          Logout
-                        </StyledButton>
                       </>
                     :
                       <>
                         <div>Sign Up or Sign In</div><br />
-                        <StyledButton
-                        onClick={() => loginWithRedirect()}
-                        >
-                          Auth0 Login
-                        </StyledButton>
                       </>
                 }
               </>

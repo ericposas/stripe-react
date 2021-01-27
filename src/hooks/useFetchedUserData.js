@@ -1,6 +1,6 @@
-import { useAuth0 } from '@auth0/auth0-react'
 import React from 'react'
-import { useAuthToken } from '../App'
+import { useAuth0 } from '@auth0/auth0-react'
+import useAuthToken from './useAuthToken'
 
 export default function useFetchedUserData () {
 
@@ -23,15 +23,7 @@ export default function useFetchedUserData () {
     } else {
       console.log('not fetching', user, jwt)
     }
-
-    // if (user) {
-    //   if (jwt) {
-    //   // if (localStorage.getItem('gym-app-jwt')) {
-    //     // let jwt = JSON.parse(localStorage.getItem('gym-app-jwt'))['access_token']
-    //     // let's get Auth0 user instead data
-    //   }
-    // }
-
+    
   }, [jwt, user])
 
   return fetchedUserData

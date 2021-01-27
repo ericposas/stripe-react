@@ -14,6 +14,7 @@ import styled, { css } from 'styled-components'
 import { useAuth0 } from '@auth0/auth0-react'
 import Checkout from './components/Checkout'
 import useFetchedUserData from './hooks/useFetchedUserData'
+import UpdateUserDataForm from './components/UpdateUserDataForm'
 
 const Header = styled.h3`
 padding: 20px 0 20px 0;
@@ -44,7 +45,7 @@ ${props => props.slide && css`
 `}
 `
 
-function SomethingSomethingComplete () {
+function SomethingSomethingComplete ({ doAction }) {
    
   const [modal, setModal] = React.useState(false)
   const history = useHistory()
@@ -67,6 +68,7 @@ function SomethingSomethingComplete () {
               setTimeout(() => {
                 history.push('/')
                 setModal(false)
+                doAction()
                 window.location.reload()
               }, 2500)
             }
@@ -127,9 +129,14 @@ function DrawerLeftPanel ({ drawerOpen, setDrawerOpen }) {
             Account
           </h4>
           <br />
-          <StyledButton
-          style={{ backgroundColor: 'royalblue' }}
-          >Update email address</StyledButton>
+          <Link to='/update-profile'>
+            <StyledButton
+            onClick={() => setDrawerOpen(false)}
+            style={{ backgroundColor: 'royalblue' }}
+            >
+              Update profile info
+            </StyledButton>
+          </Link>
 
         </div>
       : null
@@ -162,104 +169,39 @@ function DarkenDiv ({ drawerOpen, setDrawerOpen }) {
   )
 }
 
-// export function useAuthToken (isAuth) {
-//   const [jwt, setJwt] = React.useState(null)
-//   // const { isAuthenticated } = useAuth0()
-//   React.useEffect(() => {
-//     if (isAuth === true) {
-//       if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
-//         fetch('/retrieve-api-token', {
-//           method: 'POST',
-//           headers: { 'Content-type': 'application/json' }
-//         })
-//         .then(response => response.json())
-//         .then(data => {
-//           console.log(data)
-//           setJwt(data)
-//           localStorage.setItem('gym-app-jwt', JSON.stringify(data))
-//           // we will update this to send the jwt to our mongo db for better security...
-//           // we will then need to blacklist or invalidate old jwt tokens as well
-//           // but for now, let's make a request using the jwt! (at Success component)
-//           // request will be PATCH to update user 
-//         })
-//         .catch(err => console.log(err))
-//       }
-//     }
-//   }, [isAuth])
-//   return jwt
-// }
-
-export function useAuthToken () {
-
-  const [jwt, setJwt] = React.useState(null)
-  const { isAuthenticated } = useAuth0()
-
-  React.useEffect(() => {
-    console.log(
-      'user auth: ', isAuthenticated
-    )
-    if (isAuthenticated === true) {
-      if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
-        fetch('/retrieve-api-token', {
-          method: 'POST',
-          headers: { 'Content-type': 'application/json' }
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log(data)
-          setJwt(data)
-          localStorage.setItem('gym-app-jwt', JSON.stringify(data))
-          // we will update this to send the jwt to our mongo db for better security...
-          // we will then need to blacklist or invalidate old jwt tokens as well
-          // but for now, let's make a request using the jwt! (at Success component)
-          // request will be PATCH to update user 
-        })
-        .catch(err => console.log(err))
-      } else {
-        setJwt(JSON.parse(localStorage.getItem('gym-app-jwt')))
-      }
-      console.log(jwt)
-    }
-
-  }, [isAuthenticated])
-
-  return jwt
-
-}
-
 function App() {
   
   const { loginWithRedirect, isAuthenticated, isLoading, logout, user } = useAuth0()
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const fetchedUserData = useFetchedUserData()
-  // const [renderTrigger, setRenderTrigger] = React.useState(0)
 
   return (
     <>
       <div className='App'>
         <Router>
           
+          <StyledButton
+          onClick={() => {
+            setDrawerOpen(true)
+          }}
+          style={{ position: 'absolute', left: '14px', top: '7px', width: '50px', fontSize: '24px' }}
+          >
+            &equiv;
+          </StyledButton>
+
           <Link to='/' style={{ textDecoration: 'none' }}>
             <Header>
               { process.env.REACT_APP_WEB_APP_NAME }
-              <StyledButton
-              onClick={() => setDrawerOpen(true)}
-              style={{ position: 'absolute', left: '14px', top: '7px', width: '50px', fontSize: '24px' }}
-              >
-                {/* &#8680; */}
-                &equiv;
-              </StyledButton>
               {
                 isLoading ? <></> :
                   isAuthenticated ?
                   <StyledButton
                     style={{ position: 'absolute', right: '14px', top: '7px', width: '120px', backgroundColor: 'royalblue' }}
-                    // onClick={() => logout({ returnTo: window.location.origin })}
                     onClick={() => {
                       if (localStorage.getItem('gym-app-jwt')) {
                         localStorage.removeItem('gym-app-jwt')
                       }
-                      return logout({ returnTo: window.location.origin })
+                      logout({ returnTo: window.location.origin })
                     }}
                     >
                     Logout
@@ -275,7 +217,9 @@ function App() {
             </Header>
           </Link>
 
-          <SomethingSomethingComplete />
+          <SomethingSomethingComplete
+          doAction={() => setDrawerOpen(false)}
+          />
 
           <div>
             <Switch>
@@ -344,18 +288,12 @@ function App() {
               <Route path='/checkout'>
                 <Checkout />
               </Route>
-              {/* {
-                isAuthenticated ?
-                <>
-                  <Route path='/success'>
-                    <SuccessPage />
-                  </Route>
-                  <Route path='/checkout'>
-                    <Checkout />
-                  </Route>
-                </>
-                : <GoBack />
-              } */}
+              <Route path='/update-profile'>
+                <br />
+                <div>Update your info</div>
+                <br />
+                <UpdateUserDataForm submitLabel={ 'Update info' } user={user} />
+              </Route>
             </Switch>
           </div>
 

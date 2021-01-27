@@ -5,6 +5,8 @@ import validator from 'validator'
 import StyledButton from './components/StyledButton'
 import { useAuth0 } from '@auth0/auth0-react'
 import awesomePhonenumber from 'awesome-phonenumber'
+import useFetchedUserData from './hooks/useFetchedUserData'
+import { useAuthToken } from './App'
 
 // function GetUser () {
     
@@ -37,40 +39,40 @@ export default function SuccessPage () {
     const location = useLocation()
     const history = useHistory()
     const { isLoading, isAuthenticated, user } = useAuth0()
+    // const jwt = useAuthToken(isAuthenticated)
+    const fetchedUser = useFetchedUserData()
+
+    const isGoogleAccount = (user) => {
+        if (user.sub) {
+            let matches = user.sub.match(/google/gi)
+            if (matches === null) {
+                return false
+            } else {
+                return true
+            }
+        }
+        return 'please include a "user" param'
+    }
 
     const handleSubmit = (event) => {
         event.preventDefault()
-        if (allFieldsValid() && localStorage.getItem('gym-app-jwt')) {
-            // send data to an endpoint to store student info
-            // fetch('/post-student-data', {
-            //     method: 'POST',
-            //     body: JSON.stringify({
-            //         firstName: firstNameField,
-            //         lastName: lastNameField,
-            //         email: emailField,
-            //         // password: passwordConfirmField,
-            //     }),
-            //     headers: { 'Content-type': 'application/json' }
-            // })
-            // .then(response => response.json())
-            // .then(response => console.log(response))
-            // .catch(err => console.log(err))
-
+        if ((allFieldsValid() || (isGoogleAccount(user) && validator.isMobilePhone(phoneField))) && localStorage.getItem('gym-app-jwt')) {
             let jwt = JSON.parse(localStorage.getItem('gym-app-jwt'))['access_token']
-            console.log( jwt )
-
+            let bodyShape = {
+                user_metadata: {
+                    mobile: phoneField
+                },
+            }
+            if (!isGoogleAccount(user)) {
+                bodyShape.given_name = firstNameField
+                bodyShape.family_name = lastNameField
+                // bodyShape.email = emailField
+            }
             if (localStorage.getItem('gym-app-jwt')) {
                 let status, statusCode
                 fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.sub}`, {
                     method: 'PATCH',
-                    body: JSON.stringify({
-                        given_name: firstNameField,
-                        family_name: lastNameField,
-                        email: emailField,
-                        user_metadata: {
-                            mobile: phoneField
-                        },
-                    }),
+                    body: JSON.stringify(bodyShape),
                     headers: { 'content-type': 'application/json', 'authorization': `Bearer ${jwt}` }
                 })
                 .then(response => {
@@ -118,36 +120,24 @@ export default function SuccessPage () {
             session_id = location.search.split('=')[1]
         }
         if (session_id) {
-            if (isAuthenticated) {
-                if (localStorage.getItem('gym-app-jwt')) {
-                    let jwt = JSON.parse(localStorage.getItem('gym-app-jwt'))['access_token']
-                    // let's get Auth0 user email instead
-                    fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.sub}`, {
-                        method: 'GET',
-                        headers: { 'authorization': `Bearer ${jwt}` }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('auth0-user-data:', data)
-                        setEmailField( data.email )
-                    })
-                    .catch(err => console.log(err))
-                    
-                    // get stripe customer data 
-                    fetch('/get-checkout-session', {
-                        method: 'POST',
-                        body: JSON.stringify({ session_id }),
-                            headers: { 'Content-type': 'application/json' }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        let { customer } = data
-                        console.log('stripe-customer-data:', customer)
-                    })
-                    .catch(err => console.log(err))
 
-                }
+            if (isAuthenticated) {
+
+                // get stripe customer data 
+                fetch('/get-checkout-session', {
+                    method: 'POST',
+                    body: JSON.stringify({ session_id }),
+                        headers: { 'Content-type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let { customer } = data
+                    console.log('stripe-customer-data:', customer)
+                })
+                .catch(err => console.log(err))
+
             }
+
         } else {
             // redirect to home
             history.push('/')
@@ -155,28 +145,78 @@ export default function SuccessPage () {
 
     }, [ isAuthenticated ])
 
+    // React.useEffect(() => {
+    //     if (fetchedUser) {
+    //         setEmailField(fetchedUser.email)
+    //     }
+    // }, [fetchedUser])
     
     const [firstNameField, setFirstNameField] = React.useState('')
     const [lastNameField, setLastNameField] = React.useState('')
-    const [emailField, setEmailField] = React.useState('')
     const [phoneField, setPhoneField] = React.useState('')
+    // const [emailField, setEmailField] = React.useState('')
     // const [passwordField, setPasswordField] = React.useState('')
     // const [passwordConfirmField, setPasswordConfirmField] = React.useState('')
 
     const allFieldsValid = () => {
-        if (
-            // (!validator.isEmpty(passwordField) || validator.isLength(passwordField, { min: 8, max: 100 })) &&
-            // isEqual(passwordField, passwordConfirmField) &&
-            !validator.isEmpty(firstNameField) &&
-            !validator.isEmpty(lastNameField) &&
-            validator.isEmail(emailField) && 
+        if (!validator.isEmpty(firstNameField) && !validator.isEmpty(lastNameField) &&
             validator.isMobilePhone(phoneField)
+            // validator.isEmail(emailField) &&
         ) {
             return true
         } else {
             return false
         }
     }
+
+    // const FirstLastEmailEdit = ({ user, firstNameField, setFirstNameField, lastNameField, setLastNameField, emailField, setEmailField }) => {
+    //     if (user && user.sub) {
+    //         if (!isGoogleAccount(user)) {
+    //             return (
+    //                 <>
+    //                     <label htmlFor='first-name'>First name: &nbsp;</label>
+    //                     <input
+    //                     id='first-name' type='text'
+    //                     onChange={(event) => {
+    //                         setFirstNameField(event.target.value)
+    //                     }}
+    //                     value={firstNameField}
+    //                     />
+    //                     <div style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter a first name' }
+    //                     </div>
+    //                     <br />
+    //                     <br />
+    
+    //                     <label htmlFor='last-name'>Last name: &nbsp;</label>
+    //                     <input
+    //                     id='last-name' type='text'
+    //                     onChange={(event) => {
+    //                         setLastNameField(event.target.value)
+    //                     }}
+    //                     value={lastNameField}
+    //                     />
+    //                     <div style={{ color: 'red' }} >{ !validator.isEmpty(lastNameField) ? null : 'enter a last name' }
+    //                     </div>
+    //                     <br />
+    //                     <br />
+    
+    //                     <label htmlFor='email'>Email address: &nbsp;</label>
+    //                     <input
+    //                     id='email' type='text'
+    //                     value={emailField}
+    //                     onChange={(event) => {
+    //                         setEmailField(event.target.value)
+    //                     }}
+    //                     />
+    //                     <div style={{ color: 'red' }} > { validator.isEmail(emailField) ? null : 'enter a valid email' }</div>
+    //                     <br />
+    //                     <br />
+    //                 </>
+    //             )
+    //         }
+    //     }
+    //     return <></>
+    // }
 
     const markup = () => (
         <>
@@ -190,43 +230,60 @@ export default function SuccessPage () {
             className={'Success_form'}
             onSubmit={handleSubmit}>
 
-                <label htmlFor='first-name'>First name: &nbsp;</label>
-                <input
-                id='first-name' type='text'
-                onChange={(event) => {
-                setFirstNameField(event.target.value)
-                }}
-                value={firstNameField}
-                />
-                <div style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter a first name' }
-                </div>
-                <br />
-                <br />
+                {/* <FirstLastEmailEdit
+                firstNameField={firstNameField}
+                setFirstNameField={setFirstNameField}
+                lastNameField={lastNameField}
+                setLastNameField={setLastNameField}
+                emailField={emailField}
+                setEmailField={setEmailField}
+                user={user}
+                /> */}
 
-                <label htmlFor='last-name'>Last name: &nbsp;</label>
-                <input
-                id='last-name' type='text'
-                onChange={(event) => {
-                setLastNameField(event.target.value)
-                }}
-                value={lastNameField}
-                />
-                <div style={{ color: 'red' }} >{ !validator.isEmpty(lastNameField) ? null : 'enter a last name' }
-                </div>
-                <br />
-                <br />
-
-                <label htmlFor='email'>Email address: &nbsp;</label>
-                <input
-                id='email' type='text'
-                value={emailField}
-                onChange={(event) => {
-                    setEmailField(event.target.value)
-                }}
-                />
-                <div style={{ color: 'red' }} > { validator.isEmail(emailField) ? null : 'enter a valid email' }</div>
-                <br />
-                <br />
+                {
+                    user && user.sub && !isGoogleAccount(user) ?
+                    <>
+                        <label htmlFor='first-name'>First name: &nbsp;</label>
+                        <input
+                        id='first-name' type='text'
+                        onChange={(event) => {
+                            setFirstNameField(event.target.value)
+                        }}
+                        value={firstNameField}
+                        />
+                        <div style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter a first name' }
+                        </div>
+                        <br />
+                        <br />
+    
+                        <label htmlFor='last-name'>Last name: &nbsp;</label>
+                        <input
+                        id='last-name' type='text'
+                        onChange={(event) => {
+                            setLastNameField(event.target.value)
+                        }}
+                        value={lastNameField}
+                        />
+                        <div style={{ color: 'red' }} >{ !validator.isEmpty(lastNameField) ? null : 'enter a last name' }
+                        </div>
+                        <br />
+                        <br />
+    
+                        {/* sending an email field will trigger an auth0 logout */}
+                        {/* <label htmlFor='email'>Email address: &nbsp;</label>
+                        <input
+                        id='email' type='text'
+                        value={emailField}
+                        onChange={(event) => {
+                            setEmailField(event.target.value)
+                        }}
+                        />
+                        <div style={{ color: 'red' }} > { validator.isEmail(emailField) ? null : 'enter a valid email' }</div>
+                        <br />
+                        <br /> */}
+                    </>
+                    : null
+                }
 
                 <label htmlFor='phone'>Mobile number:</label>
                 <input
@@ -275,7 +332,7 @@ export default function SuccessPage () {
                 <br />
                 <br /> */}
                 {
-                    allFieldsValid() ?
+                    (allFieldsValid() || (isGoogleAccount(user) && validator.isMobilePhone(phoneField))) ?
                     <StyledButton
                     type='submit' role='button'>
                         Complete Enrollment

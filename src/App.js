@@ -10,9 +10,10 @@ import {
 import './App.css'
 import SuccessPage from './Success'
 import StyledButton from './components/StyledButton'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { useAuth0 } from '@auth0/auth0-react'
 import Checkout from './components/Checkout'
+import useFetchedUserData from './hooks/useFetchedUserData'
 
 const Header = styled.h3`
 padding: 20px 0 20px 0;
@@ -21,21 +22,26 @@ color: #fff;
 cursor: pointer;
 `
 
-function LogUser () {
-  // const history = useHistory()
-  const { user } = useAuth0()
-  React.useEffect(() => {
-    console.log( user )
-  }, [])
-  return <></>
-}
+// function LogUser () {
+//   const { user } = useAuth0()
+//   React.useEffect(() => {
+//     console.log( user )
+//   }, [])
+//   return <></>
+// }
 
 const ModalDiv = styled.div`
 color: white;
 padding: 10px 25px;
 border-radius: 3px;
 background-color: mediumseagreen;
-box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.2)
+box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.2);
+positon: absolute;
+transform: translateX(-200px);
+transition: transform .35s ease-out;
+${props => props.slide && css`
+  transform: translateX(0px);
+`}
 `
 
 function SomethingSomethingComplete () {
@@ -43,10 +49,10 @@ function SomethingSomethingComplete () {
   const [modal, setModal] = React.useState(false)
   const history = useHistory()
   const location = useLocation()
+  const [slide, setSlide] = React.useState(false)
 
   React.useEffect(() => {
     if (location) {
-      // let location = window.location
       let search = location.search.substr(1, location.search.length)
       let params = search.split('=')
       if (params) {
@@ -57,8 +63,10 @@ function SomethingSomethingComplete () {
           if (key === 'profileSetup') {
             if (value === 'complete') {
               setModal(true) // maybe replace this with react toast lib
+              setTimeout(() => setSlide(true), 50)
               setTimeout(() => {
                 history.push('/')
+                setModal(false)
                 window.location.reload()
               }, 2500)
             }
@@ -73,7 +81,7 @@ function SomethingSomethingComplete () {
     {
       modal ?
         <>
-          <ModalDiv>
+          <ModalDiv slide={ slide ? true : null }>
             Thank you for completing your profile!
           </ModalDiv>
           <br />
@@ -154,31 +162,68 @@ function DarkenDiv ({ drawerOpen, setDrawerOpen }) {
   )
 }
 
-function useFetchedUserData (user) {
+// export function useAuthToken (isAuth) {
+//   const [jwt, setJwt] = React.useState(null)
+//   // const { isAuthenticated } = useAuth0()
+//   React.useEffect(() => {
+//     if (isAuth === true) {
+//       if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
+//         fetch('/retrieve-api-token', {
+//           method: 'POST',
+//           headers: { 'Content-type': 'application/json' }
+//         })
+//         .then(response => response.json())
+//         .then(data => {
+//           console.log(data)
+//           setJwt(data)
+//           localStorage.setItem('gym-app-jwt', JSON.stringify(data))
+//           // we will update this to send the jwt to our mongo db for better security...
+//           // we will then need to blacklist or invalidate old jwt tokens as well
+//           // but for now, let's make a request using the jwt! (at Success component)
+//           // request will be PATCH to update user 
+//         })
+//         .catch(err => console.log(err))
+//       }
+//     }
+//   }, [isAuth])
+//   return jwt
+// }
 
-  const [fetchedUserData, setFetchedUserData] = React.useState(null)
+export function useAuthToken () {
+
+  const [jwt, setJwt] = React.useState(null)
+  const { isAuthenticated } = useAuth0()
 
   React.useEffect(() => {
-    
-    if (user) {
-      if (localStorage.getItem('gym-app-jwt')) {
-        let jwt = JSON.parse(localStorage.getItem('gym-app-jwt'))['access_token']
-        // let's get Auth0 user instead data
-        fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.sub}`, {
-            method: 'GET',
-            headers: { 'authorization': `Bearer ${jwt}` }
+    console.log(
+      'user auth: ', isAuthenticated
+    )
+    if (isAuthenticated === true) {
+      if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
+        fetch('/retrieve-api-token', {
+          method: 'POST',
+          headers: { 'Content-type': 'application/json' }
         })
         .then(response => response.json())
         .then(data => {
-            setFetchedUserData(data)
+          console.log(data)
+          setJwt(data)
+          localStorage.setItem('gym-app-jwt', JSON.stringify(data))
+          // we will update this to send the jwt to our mongo db for better security...
+          // we will then need to blacklist or invalidate old jwt tokens as well
+          // but for now, let's make a request using the jwt! (at Success component)
+          // request will be PATCH to update user 
         })
         .catch(err => console.log(err))
+      } else {
+        setJwt(JSON.parse(localStorage.getItem('gym-app-jwt')))
       }
+      console.log(jwt)
     }
 
-  }, [user])
+  }, [isAuthenticated])
 
-  return fetchedUserData
+  return jwt
 
 }
 
@@ -186,48 +231,8 @@ function App() {
   
   const { loginWithRedirect, isAuthenticated, isLoading, logout, user } = useAuth0()
   const [drawerOpen, setDrawerOpen] = React.useState(false)
-  const fetchedUserData = useFetchedUserData(user)
-  
-  React.useEffect(() => {
-    
-    if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
-      fetch('/retrieve-api-token', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data)
-        localStorage.setItem('gym-app-jwt', JSON.stringify(data))
-        // we will update this to send the jwt to our mongo db for better security...
-        // we will then need to blacklist or invalidate old jwt tokens as well
-        // but for now, let's make a request using the jwt! (at Success component)
-        // request will be PATCH to update user 
-      })
-      .catch(err => console.log(err))
-    }
-
-  }, [])
-
-  React.useEffect(() => {
-
-    if (!isLoading && !isAuthenticated) {
-      if (localStorage.getItem('gym-app-jwt')) {
-        localStorage.removeItem('gym-app-jwt')
-      }
-    }
-
-  }, [isLoading, isAuthenticated])
-
-  React.useEffect(() => {
-    
-    console.log(
-      `fetchedUserData:`, fetchedUserData
-    )
-
-  }, [fetchedUserData])
+  const fetchedUserData = useFetchedUserData()
+  // const [renderTrigger, setRenderTrigger] = React.useState(0)
 
   return (
     <>
@@ -249,7 +254,13 @@ function App() {
                   isAuthenticated ?
                   <StyledButton
                     style={{ position: 'absolute', right: '14px', top: '7px', width: '120px', backgroundColor: 'royalblue' }}
-                    onClick={() => logout({ returnTo: window.location.origin })}
+                    // onClick={() => logout({ returnTo: window.location.origin })}
+                    onClick={() => {
+                      if (localStorage.getItem('gym-app-jwt')) {
+                        localStorage.removeItem('gym-app-jwt')
+                      }
+                      return logout({ returnTo: window.location.origin })
+                    }}
                     >
                     Logout
                   </StyledButton>
@@ -279,17 +290,30 @@ function App() {
                           {
                             user ?
                             <>
-                              <h3>
-                                Welcome { user.given_name && user.family_name ? `${user.given_name} ${user.family_name}` : user.name }
-                              </h3>
-                              <h4>
-                                Email: { user.name }
-                              </h4>
-                              <h4>
-                                Phone number: { fetchedUserData && fetchedUserData.user_metadata && fetchedUserData.user_metadata.mobile ? fetchedUserData.user_metadata.mobile : null }
-                              </h4>
-                              <LogUser />
-                              {/* <h4>{user.email}</h4> */}
+                              {
+                                fetchedUserData ?
+                                <>
+                                  <h3>
+                                    Welcome { fetchedUserData.given_name && fetchedUserData.family_name ? `${fetchedUserData.given_name} ${fetchedUserData.family_name}` : user.name }
+                                  </h3>
+                                  {
+                                    fetchedUserData.email && (
+                                      <h4>
+                                        Email: { fetchedUserData.email }
+                                      </h4>
+                                    )
+                                  }
+                                  {
+                                    fetchedUserData.user_metadata && (
+                                      <h4>
+                                        Phone number: { fetchedUserData.user_metadata.mobile ? fetchedUserData.user_metadata.mobile : null }
+                                      </h4>
+                                    )
+                                  }
+                                </>
+                                : null
+                              }
+                              {/* <LogUser /> */}
                             </>
                             : null
                           }

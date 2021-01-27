@@ -2,9 +2,9 @@ import React from 'react'
 import './Success.css'
 import { useLocation, useHistory } from 'react-router-dom'
 import validator from 'validator'
-import { isEqual } from 'lodash'
 import StyledButton from './components/StyledButton'
 import { useAuth0 } from '@auth0/auth0-react'
+import awesomePhonenumber from 'awesome-phonenumber'
 
 // function GetUser () {
     
@@ -65,7 +65,11 @@ export default function SuccessPage () {
                     method: 'PATCH',
                     body: JSON.stringify({
                         given_name: firstNameField,
-                        family_name: lastNameField
+                        family_name: lastNameField,
+                        email: emailField,
+                        user_metadata: {
+                            mobile: phoneField
+                        },
                     }),
                     headers: { 'content-type': 'application/json', 'authorization': `Bearer ${jwt}` }
                 })
@@ -107,12 +111,6 @@ export default function SuccessPage () {
         }
     }
 
-    const [firstNameField, setFirstNameField] = React.useState('')
-    const [lastNameField, setLastNameField] = React.useState('')
-    const [emailField, setEmailField] = React.useState('')
-    // const [passwordField, setPasswordField] = React.useState('')
-    // const [passwordConfirmField, setPasswordConfirmField] = React.useState('')
-
     React.useEffect(() => {
         // get session data to populate form fields
         let session_id
@@ -130,40 +128,49 @@ export default function SuccessPage () {
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data)
+                        console.log('auth0-user-data:', data)
                         setEmailField( data.email )
                     })
                     .catch(err => console.log(err))
+                    
+                    // get stripe customer data 
+                    fetch('/get-checkout-session', {
+                        method: 'POST',
+                        body: JSON.stringify({ session_id }),
+                            headers: { 'Content-type': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        let { customer } = data
+                        console.log('stripe-customer-data:', customer)
+                    })
+                    .catch(err => console.log(err))
+
                 }
             }
         } else {
             // redirect to home
             history.push('/')
         }
-            // let response = fetch('/get-checkout-session', {
-            // method: 'POST',
-            // body: JSON.stringify({ session_id }),
-            //     headers: { 'Content-type': 'application/json' }
-            // })
-            // .then(response => response.json())
-            // .catch(err => console.log(err))
-            
-            // response
-            // .then(data => {
-            //     let { customer } = data
-            //     // setEmailField(customer.email)
-            //     console.log(customer)
-            // })
-            // .catch(err => console.log(err))
 
     }, [ isAuthenticated ])
+
+    
+    const [firstNameField, setFirstNameField] = React.useState('')
+    const [lastNameField, setLastNameField] = React.useState('')
+    const [emailField, setEmailField] = React.useState('')
+    const [phoneField, setPhoneField] = React.useState('')
+    // const [passwordField, setPasswordField] = React.useState('')
+    // const [passwordConfirmField, setPasswordConfirmField] = React.useState('')
 
     const allFieldsValid = () => {
         if (
             // (!validator.isEmpty(passwordField) || validator.isLength(passwordField, { min: 8, max: 100 })) &&
             // isEqual(passwordField, passwordConfirmField) &&
-            !validator.isEmpty(firstNameField) && !validator.isEmpty(lastNameField) &&
-            validator.isEmail(emailField)
+            !validator.isEmpty(firstNameField) &&
+            !validator.isEmpty(lastNameField) &&
+            validator.isEmail(emailField) && 
+            validator.isMobilePhone(phoneField)
         ) {
             return true
         } else {
@@ -178,9 +185,11 @@ export default function SuccessPage () {
                 Payment was successful! Please finish setting up your profile
             </div>
             <br />
+
             <form
             className={'Success_form'}
             onSubmit={handleSubmit}>
+
                 <label htmlFor='first-name'>First name: &nbsp;</label>
                 <input
                 id='first-name' type='text'
@@ -189,14 +198,11 @@ export default function SuccessPage () {
                 }}
                 value={firstNameField}
                 />
-                <div style={{ color: 'red' }} >
-                {
-                    validator.isEmpty(firstNameField) ?
-                    'enter a name' : null
-                }
+                <div style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter a first name' }
                 </div>
                 <br />
                 <br />
+
                 <label htmlFor='last-name'>Last name: &nbsp;</label>
                 <input
                 id='last-name' type='text'
@@ -205,30 +211,35 @@ export default function SuccessPage () {
                 }}
                 value={lastNameField}
                 />
-                <div style={{ color: 'red' }} >
-                {
-                    validator.isEmpty(lastNameField) ?
-                    'enter a last name' : null
-                }
+                <div style={{ color: 'red' }} >{ !validator.isEmpty(lastNameField) ? null : 'enter a last name' }
                 </div>
                 <br />
                 <br />
+
                 <label htmlFor='email'>Email address: &nbsp;</label>
                 <input
                 id='email' type='text'
                 value={emailField}
                 onChange={(event) => {
-                setEmailField(event.target.value)
+                    setEmailField(event.target.value)
                 }}
                 />
-                <div style={{ color: 'red' }} >
-                {
-                    !validator.isEmail(emailField) ?
-                    'enter a valid email' : null
-                }
-                </div>
+                <div style={{ color: 'red' }} > { validator.isEmail(emailField) ? null : 'enter a valid email' }</div>
                 <br />
                 <br />
+
+                <label htmlFor='phone'>Mobile number:</label>
+                <input
+                id='phone' type='tel'
+                value={phoneField}
+                onChange={(event) => {
+                    setPhoneField(event.target.value)
+                }}
+                />
+                <div style={{ color: 'red' }} > { new awesomePhonenumber(phoneField, 'US').isValid() ? null : 'enter a valid mobile number' }</div>
+                <br />
+                <br />
+
                 {/* <label htmlFor='password'>Password: &nbsp;</label>
                 <input
                 id='password' type='password'

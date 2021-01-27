@@ -9,3 +9,7 @@ h3 {
 .App {
   text-align: center;
 }
+
+.SidePanel_container > div {
+  color: black;
+}

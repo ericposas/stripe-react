@@ -7,6 +7,7 @@ import { isGoogleAccount } from '../utils/utils'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useHistory } from 'react-router-dom'
 import useFetchedUserData from '../hooks/useFetchedUserData'
+import { isEqual } from 'lodash'
 
 export default function UpdateUserDataForm ({ submitLabel }) {
 
@@ -15,6 +16,7 @@ export default function UpdateUserDataForm ({ submitLabel }) {
     const fetchedUserData = useFetchedUserData()
     const [firstNameField, setFirstNameField] = React.useState('')
     const [lastNameField, setLastNameField] = React.useState('')
+    const [emailField, setEmailField] = React.useState('')
     const [phoneField, setPhoneField] = React.useState('')
     
     React.useEffect(() => {
@@ -22,13 +24,18 @@ export default function UpdateUserDataForm ({ submitLabel }) {
             if (!isGoogleAccount(user)) {
                 setFirstNameField(fetchedUserData?.given_name ? fetchedUserData.given_name : '')
                 setLastNameField(fetchedUserData?.given_name ? fetchedUserData.family_name : '')
-                setPhoneField(fetchedUserData?.user_metadata?.mobile ? fetchedUserData.user_metadata.mobile : '')
+                setEmailField(fetchedUserData?.email ? fetchedUserData.email : '')
             }
+            setPhoneField(fetchedUserData?.user_metadata?.mobile ? fetchedUserData.user_metadata.mobile : '')
         }
     }, [fetchedUserData, user])
 
     const allFieldsValid = () => {
-        if (!validator.isEmpty(firstNameField) && !validator.isEmpty(lastNameField) && validator.isMobilePhone(phoneField)) {
+        if (
+            !validator.isEmpty(firstNameField) && !validator.isEmpty(lastNameField) &&
+            validator.isMobilePhone(phoneField) &&
+            validator.isEmail(emailField)
+            ) {
             return true
         } else {
             return false
@@ -47,6 +54,9 @@ export default function UpdateUserDataForm ({ submitLabel }) {
             if (!isGoogleAccount(user)) {
                 bodyShape.given_name = firstNameField
                 bodyShape.family_name = lastNameField
+                if (emailField !== user.email) {
+                    bodyShape.email = emailField
+                }
                 // bodyShape.email = emailField //-- email field triggers an auto-logout bc auth0 needs to reverify credentials
             }
             if (localStorage.getItem('gym-app-jwt')) {
@@ -96,63 +106,107 @@ export default function UpdateUserDataForm ({ submitLabel }) {
 
 
     return (
-        <form
-        className={'Success_form'}
-        onSubmit={handleSubmit}>
+        <>
             {
-                user && user.sub && !isGoogleAccount(user) ?
-                <>
-                    <label htmlFor='first-name'>First name: &nbsp;</label>
-                    <input
-                    id='first-name' type='text'
-                    onChange={(event) => {
-                        setFirstNameField(event.target.value)
-                    }}
-                    value={firstNameField}
-                    />
-                    <div style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter a first name' }
-                    </div>
-                    <br />
-                    <br />
-
-                    <label htmlFor='last-name'>Last name: &nbsp;</label>
-                    <input
-                    id='last-name' type='text'
-                    onChange={(event) => {
-                        setLastNameField(event.target.value)
-                    }}
-                    value={lastNameField}
-                    />
-                    <div style={{ color: 'red' }} >{ !validator.isEmpty(lastNameField) ? null : 'enter a last name' }
-                    </div>
-                    <br />
-                    <br />
-                </>
-                : null
+                (user && isGoogleAccount(user)) && (
+                    <>
+                        <br />
+                        <div>Your name and email details are managed by Google</div>
+                        <br />
+                    </>
+                )
             }
+            <form
+            style={{ height: user && isGoogleAccount(user) ? '110px' : '220px' }}
+            className={'Success_form'}
+            onSubmit={handleSubmit}>
+                {
+                    user && user.sub && !isGoogleAccount(user) ?
+                    <>
+                        <label htmlFor='first-name'>First name: &nbsp;</label>
+                        <input
+                        id='first-name' type='text'
+                        onChange={(event) => {
+                            setFirstNameField(event.target.value)
+                        }}
+                        value={firstNameField}
+                        />
+                        <div style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter a first name' }
+                        </div>
+                        <br />
+                        <br />
 
-            <label htmlFor='phone'>Mobile number:</label>
-            <input
-            id='phone' type='tel'
-            value={phoneField}
-            onChange={(event) => {
-                setPhoneField(event.target.value)
-            }}
-            />
-            <div style={{ color: 'red' }} > { new awesomePhonenumber(phoneField, 'US').isValid() ? null : 'enter a valid mobile number' }</div>
-            <br />
-            <br />
-            
-            {
-                user &&
-                    (allFieldsValid() || (isGoogleAccount(user) && validator.isMobilePhone(phoneField))) ?
-                    <StyledButton
-                    type='submit' role='button'>
-                        { submitLabel }
-                    </StyledButton>
+                        <label htmlFor='last-name'>Last name: &nbsp;</label>
+                        <input
+                        id='last-name' type='text'
+                        onChange={(event) => {
+                            setLastNameField(event.target.value)
+                        }}
+                        value={lastNameField}
+                        />
+                        <div style={{ color: 'red' }} >{ !validator.isEmpty(lastNameField) ? null : 'enter a last name' }
+                        </div>
+                        <br />
+                        <br />
+                    </>
                     : null
-            }
-        </form>
+                }
+
+                {
+                    user && (
+                        <>
+                            <label htmlFor='phone'>Mobile number:</label>
+                            <input
+                            id='phone' type='tel'
+                            value={phoneField}
+                            onChange={(event) => {
+                                setPhoneField(event.target.value)
+                            }}
+                            />
+                            <div style={{ color: 'red' }} > { new awesomePhonenumber(phoneField, 'US').isValid() ? null : 'enter a valid number' }</div>
+                            <br />
+                            <br />
+                        </>
+                    )
+                }
+                
+                {
+                    (user && user.email && !isGoogleAccount(user)) ?
+                        <>
+                            <label htmlFor='email'>Email:</label>
+                            <input
+                            id='email' type='text'
+                            value={emailField}
+                            onChange={(event) => {
+                                setEmailField(event.target.value)
+                            }}
+                            />
+                            <div style={{ color: validator.isEmail(emailField) ? 'green' : 'red' }} >
+                                {
+                                    !isEqual(emailField, user.email) ?
+                                        validator.isEmail(emailField) ?
+                                        'requires sign in upon change'
+                                        : 'not a valid email'
+                                    : ''
+                                }
+                            </div>
+                            <br />
+                            <br />
+                        </>
+                    : 'no user data'
+                }
+                <br />
+                {
+                    user &&
+                        (allFieldsValid() || (isGoogleAccount(user) && validator.isMobilePhone(phoneField))) ?
+                        <StyledButton
+                        type='submit' role='button'>
+                            { submitLabel }
+                        </StyledButton>
+                        : null
+                }
+            </form>
+        </>
     )
 
 }

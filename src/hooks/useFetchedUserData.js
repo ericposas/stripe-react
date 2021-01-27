@@ -17,11 +17,12 @@ export default function useFetchedUserData () {
       })
       .then(response => response.json())
       .then(data => {
+          console.log('fetched data', data)
           setFetchedUserData(data)
       })
       .catch(err => console.log(err))
     } else {
-      console.log('not fetching', user, jwt)
+      console.log('not fetching')
     }
     
   }, [jwt, user])

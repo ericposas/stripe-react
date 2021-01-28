@@ -4,13 +4,18 @@ import { loadStripe } from '@stripe/stripe-js'
 import StyledButton from './StyledButton'
 import ProductBox from './ProductBox'
 import { useAuth0 } from '@auth0/auth0-react'
+import useFetchedUserData from '../hooks/useFetchedUserData'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
 
 export default function Checkout () {
 
     const [products, setProducts] = React.useState(null)
-  
+    const [itemsChecked, setItemsChecked] = React.useState({})
+    const [shoppingCart, setShoppingCart] = React.useState([])
+    const { isAuthenticated, isLoading } = useAuth0()
+    const fetchedUser = useFetchedUserData()
+
     React.useEffect(() => {
   
       let response = fetch('/get-list-of-products', {
@@ -28,15 +33,19 @@ export default function Checkout () {
     }, [])
   
     const handleClick = async event => {
-  
+      if (!fetchedUser) {
+        console.log(
+          'could not get auth0 fetched user object'
+        )
+      }
       if (shoppingCart.length > 0) {
-  
         // Get Stripe.js instance
         const stripe = await stripePromise
         // Call your backend to create the Checkout Session
         const response = await fetch('/create-checkout-session', {
           method: 'POST',
           body: JSON.stringify({
+            email: fetchedUser ? fetchedUser.email : null,
             line_items: shoppingCart
           }),
           headers: {
@@ -62,9 +71,6 @@ export default function Checkout () {
       }
   
     }
-  
-    const [itemsChecked, setItemsChecked] = React.useState({})
-    const [shoppingCart, setShoppingCart] = React.useState([])
   
     const updateCart = product => {
       setItemsChecked({
@@ -132,9 +138,7 @@ export default function Checkout () {
         </StyledButton>
       </>
     )
-
-    const { isAuthenticated, isLoading } = useAuth0()
-  
+    
     return (
         <>
         {

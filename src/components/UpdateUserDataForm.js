@@ -84,6 +84,9 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                     // should we do another fetch to invalidate the jwt here in
                     // the case of a 401 error?
                     if (status === 401 || statusCode === 401) {
+                        if (localStorage.getItem('gym-app-jwt')) {
+                            localStorage.removeItem('gym-app-jwt')
+                        }
                         console.log(
                             `Bad token, need to make a call to invalidate it
                             and subsequently clear jwt from localStorage or db,
@@ -171,7 +174,9 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                 }
                 
                 {
-                    (user && user.email && !isGoogleAccount(user)) ?
+                    (user && user.email) ?
+                        isGoogleAccount(user) ? ''
+                        :
                         <>
                             <label htmlFor='email'>Email:</label>
                             <input

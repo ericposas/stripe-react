@@ -11,16 +11,28 @@ export default function useFetchedUserData () {
   React.useEffect(() => {
     
     if (user && jwt) {
+      let status, statusCode
       fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.sub}`, {
           method: 'GET',
           headers: { 'authorization': `Bearer ${jwt.access_token}` }
       })
-      .then(response => response.json())
+      .then(response => {
+        status = response.status
+        return response.json()
+      })
       .then(data => {
+          statusCode = data.statusCode ? data.statusCode : null
           console.log('fetched data', data)
           setFetchedUserData(data)
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        console.log(err)
+        if (status === 401 || statusCode === 401) {
+          if (localStorage.getItem('gym-app-jwt')) {
+            localStorage.removeItem('gym-app-jwt')
+          }
+        }
+      })
     } else {
       console.log('not fetching')
     }

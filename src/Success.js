@@ -47,6 +47,11 @@ function usePatchStripeSessionData (stripeSession) {
             })
             .catch(err => {
                 console.log(err)
+                if (status === 401  || statusCode === 401) {
+                    if (localStorage.getItem('gym-app-jwt')) {
+                        localStorage.removeItem('gym-app-jwt')
+                    }
+                }
             })
         }
 

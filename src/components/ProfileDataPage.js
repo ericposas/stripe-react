@@ -1,36 +1,7 @@
 import React from 'react'
-import { useAuth0 } from '@auth0/auth0-react'
 import useFetchedUserData from '../hooks/useFetchedUserData'
-
-function useCreateStripeCustomer () {
-  
-  const { user } = useAuth0()
-
-  React.useEffect(() => {
-
-    if (user) {
-      console.log(user)
-      fetch('/create-stripe-customer', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: user.email ? user.email : user.name
-        }),
-        headers: {
-          'Content-type': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.value === true) { // if we created a new Stripe customer
-          console.log(data)
-        }
-      })
-      .catch(err => console.log(err))
-    }
-
-  }, [user])
-
-}
+import useCreateStripeCustomer from '../hooks/useCreateStripeCustomer'
+import { useAuth0 } from '@auth0/auth0-react'
 
 export default function ProfileDataPage () {
 

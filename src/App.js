@@ -217,6 +217,9 @@ function App() {
             </Header>
           </Link>
 
+          <DarkenDiv drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
+          <DrawerLeftPanel drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
+
           <SomethingSomethingComplete
           doAction={() => setDrawerOpen(false)}
           />
@@ -278,8 +281,6 @@ function App() {
                           <div>Sign Up or Sign In</div><br />
                         </>
                   }
-                  <DarkenDiv drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
-                  <DrawerLeftPanel drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
                 </>
               </Route>
               <Route path='/success'>

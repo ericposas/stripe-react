@@ -9,9 +9,9 @@ import { useHistory } from 'react-router-dom'
 import useFetchedUserData from '../hooks/useFetchedUserData'
 import { isEqual } from 'lodash'
 
-export default function UpdateUserDataForm ({ submitLabel }) {
+export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { queryKey, queryValue } }) {
 
-    const { user, isAuthenticated } = useAuth0()
+    const { user } = useAuth0()
     const history = useHistory()
     const fetchedUserData = useFetchedUserData()
     const [firstNameField, setFirstNameField] = React.useState('')
@@ -77,8 +77,8 @@ export default function UpdateUserDataForm ({ submitLabel }) {
                     console.log(data)
                     statusCode = data.statusCode ? data.statusCode : null
                     setTimeout(() => {
-                        history.push('/?profileSetup=complete')
-                    }, 1000)
+                        history.push(`/?${queryKey}=${queryValue}`)
+                    }, 250)
                 })
                 .catch(err => {
                     // should we do another fetch to invalidate the jwt here in

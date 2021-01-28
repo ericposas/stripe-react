@@ -7,7 +7,7 @@ export default function SuccessPage () {
 
     const location = useLocation()
     const history = useHistory()
-    const { isLoading, isAuthenticated } = useAuth0()
+    const { isLoading, isAuthenticated, user } = useAuth0()
 
     React.useEffect(() => {
         // get session data to populate form fields
@@ -48,7 +48,14 @@ export default function SuccessPage () {
                 Payment was successful! Please finish setting up your profile
             </div>
             <br />
-            <UpdateUserDataForm submitLabel={ 'Complete Enrollment' } />
+            <UpdateUserDataForm
+            user={user}
+            onCompleteParams={{
+                queryKey: 'profileSetup',
+                queryValue: 'complete',
+            }}
+            submitLabel={ 'Complete Enrollment' }
+            />
         </>
     )
 

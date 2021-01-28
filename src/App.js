@@ -18,8 +18,54 @@ import BurgerButton from './components/BugerButton'
 
 function App() {
   
-  const { user } = useAuth0()
+  const { user, isAuthenticated, logout } = useAuth0()
   const [drawerOpen, setDrawerOpen] = React.useState(false)
+  const minutes = React.useRef(1)
+  const seconds = React.useRef(0)
+  const timeout = React.useRef(() => setTOut(minutes.current))
+  const interval = React.useRef(() => setCountdown(minutes.current))
+
+  const setTOut = () => {
+    console.log(`logout timeout refreshed, set at ${minutes.current} minute`)
+    return setTimeout(() => {
+      logout({ redirectTo: window.location.origin })
+    }, ((1000 * 60) * minutes.current))
+  }
+
+  const setCountdown = () => {
+    seconds.current = minutes.current * 60
+    return setInterval(() => {
+      seconds.current = seconds.current - 1
+      console.log(`timer: ${seconds.current}`)
+    }, 1000)
+  }
+
+  React.useEffect(() => {
+
+    const mouseMoveHandler = () => {
+      if (timeout?.current && interval?.current) {
+        clearTimeout(timeout.current)
+        clearInterval(interval.current)
+      }
+      timeout.current = setTOut()
+      interval.current = setCountdown()
+    }
+    
+    if (isAuthenticated === true) {
+      console.log('authenticated, set a timer to logout automagically, but refresh upon mouse movement')
+      window.addEventListener('mousemove', mouseMoveHandler)
+      mouseMoveHandler() // fire once to init logout timer
+    }
+    
+    if (isAuthenticated === false) {
+      // console.log('not logged in')
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', mouseMoveHandler)
+    }
+
+  }, [isAuthenticated])
 
   return (
     <>

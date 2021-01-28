@@ -41,14 +41,14 @@ function ActionModal ({ doAction, msg, redirectPath, queryTerm, timeout, delayBe
               setTimeout(() => setSlide('in'), 50)
               setTimeout(() => {
                 setSlide('out')
-                setTimeout(() => {
-                  if (redirectPath) {
-                    history.push(redirectPath)
-                  }
-                  doAction()
-                  setModal(false)
-                }, timeout)
               }, delayBeforeLeave)
+              setTimeout(() => {
+                if (redirectPath) {
+                  history.push(redirectPath)
+                }
+                doAction()
+                setModal(false)
+              }, timeout)
             }
           }
         }
@@ -65,7 +65,8 @@ function ActionModal ({ doAction, msg, redirectPath, queryTerm, timeout, delayBe
               {msg}
             </ModalDiv_SlideIn>
         </>
-      : null
+      :
+        <></>
     }
     </>
   )

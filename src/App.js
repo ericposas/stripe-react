@@ -40,10 +40,9 @@ function App() {
           msg={'Thank you for completing your profile!'}
           redirectPath={'/'}
           timeout={3000}
-          delayBeforeLeave={2000}
+          delayBeforeLeave={2750}
           doAction={() => {
             setDrawerOpen(false)
-            window.location.reload()
           }}
           />
           
@@ -52,10 +51,9 @@ function App() {
           msg={'You have successfully updated your profile info!'}
           redirectPath={'/'}
           timeout={3000}
-          delayBeforeLeave={2000}
+          delayBeforeLeave={2750}
           doAction={() => {
             setDrawerOpen(false)
-            window.location.reload()
           }}
           />
 

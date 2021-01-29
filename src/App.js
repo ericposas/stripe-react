@@ -15,7 +15,6 @@ import { ActionModal } from './components/ActionModal'
 import AppHeader from './components/AppHeader'
 import ProfileDataPage from './components/ProfileDataPage'
 import BurgerButton from './components/BugerButton'
-import CreditCardEntry from './components/CreditCardEntry'
 import LogoutTimer from './components/LogoutTimer'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
@@ -73,17 +72,17 @@ function App() {
             <Switch>
               <Route exact path='/'>
                 <ProfileDataPage />
-                <Elements stripe={stripePromise}>
-                  <StripeCardEntryExample />
-                  {/* <CreditCardEntry /> */}
-                </Elements>
-
               </Route>
               <Route path='/success'>
                 <SuccessPage />
               </Route>
               <Route path='/checkout'>
                 <Checkout />
+              </Route>
+              <Route path='/setup-payment-method'>
+                <Elements stripe={stripePromise}>
+                  <StripeCardEntryExample />
+                </Elements>
               </Route>
               <Route path='/update-profile'>
                 <br />

@@ -18,6 +18,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
     const [lastNameField, setLastNameField] = React.useState('')
     const [emailField, setEmailField] = React.useState('')
     const [phoneField, setPhoneField] = React.useState('')
+    const isPhone = (num) => (new awesomePhonenumber(num, 'US').isValid())
     
     React.useEffect(() => {
         if (user && fetchedUserData) {
@@ -33,7 +34,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
     const allFieldsValid = () => {
         if (
             !validator.isEmpty(firstNameField) && !validator.isEmpty(lastNameField) &&
-            validator.isMobilePhone(phoneField) &&
+            isPhone(phoneField) &&
             validator.isEmail(emailField)
             ) {
             return true
@@ -44,7 +45,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
 
     const handleSubmit = (event) => {
         event.preventDefault()
-        if ((allFieldsValid() || (isGoogleAccount(user) && validator.isMobilePhone(phoneField))) && localStorage.getItem('gym-app-jwt')) {
+        if ((allFieldsValid() || (isGoogleAccount(user) && isPhone(phoneField))) && localStorage.getItem('gym-app-jwt')) {
             let jwt = JSON.parse(localStorage.getItem('gym-app-jwt'))['access_token']
             let bodyShape = {
                 user_metadata: {
@@ -166,7 +167,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                                 setPhoneField(event.target.value)
                             }}
                             />
-                            <div style={{ color: 'red' }} > { new awesomePhonenumber(phoneField, 'US').isValid() ? null : 'enter a valid number' }</div>
+                            <div style={{ color: 'red' }} > { isPhone(phoneField) ? null : 'enter a valid number' }</div>
                             <br />
                             <br />
                         </>
@@ -203,7 +204,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                 <br />
                 {
                     user &&
-                        (allFieldsValid() || (isGoogleAccount(user) && validator.isMobilePhone(phoneField))) ?
+                        (allFieldsValid() || (isGoogleAccount(user) && isPhone(phoneField))) ?
                         <StyledButton
                         type='submit' role='button'>
                             { submitLabel }

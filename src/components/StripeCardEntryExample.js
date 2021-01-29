@@ -2,13 +2,14 @@ import React, {useState} from 'react'
 import { CardElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
 import './2-Card-Detailed.css'
 import useFetchedUserData from '../hooks/useFetchedUserData';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const CARD_OPTIONS = {
   iconStyle: 'solid',
   style: {
     base: {
       iconColor: '#c4f0ff',
-      color: '#fff',
+      color: '#000',
       fontWeight: 500,
       fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
       fontSize: '16px',
@@ -17,12 +18,12 @@ const CARD_OPTIONS = {
         color: '#fce883',
       },
       '::placeholder': {
-        color: '#87bbfd',
+        color: 'rgba(0, 0, 0, 0.25)',
       },
     },
     invalid: {
-      iconColor: '#ffc7ee',
-      color: '#ffc7ee',
+      iconColor: '#666',
+      color: '#666',
     },
   },
 };
@@ -98,29 +99,32 @@ const ResetButton = ({onClick}) => (
 );
 
 export default function StripeCardEntryExample () {
-  const stripe = useStripe();
-  const elements = useElements();
+
+  const stripe = useStripe()
+  const elements = useElements()
   const fetchedUser = useFetchedUserData() // my hook 
-  const [error, setError] = useState(null);
-  const [cardComplete, setCardComplete] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState(null);
+  const { isLoading, isAuthenticated } = useAuth0()
+  const [error, setError] = useState(null)
+  const [cardComplete, setCardComplete] = useState(false)
+  const [processing, setProcessing] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState(null)
   const [billingDetails, setBillingDetails] = useState({
     email: '',
     phone: '',
     name: '',
-  });
+  })
+  const [keepBillingDetails, setKeepBillingDetails] = useState(true)
 
   React.useEffect(() => {
     if (fetchedUser) {
         setBillingDetails({
             email: fetchedUser.email,
-            phone: fetchedUser.user_metadata?.mobile,
-            name: fetchedUser?.given_name + ' ' + fetchedUser?.family_name
+            phone: fetchedUser.user_metadata?.mobile ? fetchedUser.user_metadata.mobile : '',
+            name: fetchedUser?.given_name && fetchedUser?.family_name ? fetchedUser.given_name + ' ' + fetchedUser.family_name : 'user'
         })
     }
   }, [fetchedUser])
-  
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (fetchedUser?.user_metadata?.stripe?.customer) {
@@ -235,75 +239,148 @@ export default function StripeCardEntryExample () {
     });
   };
 
-  return paymentMethod ? (
-    <div className="Result">
-      <div className="ResultTitle" role="alert">
-        Payment successful
-      </div>
-      <div className="ResultMessage">
-        Thanks for trying Stripe Elements. No money was charged, but we
-        generated a PaymentMethod: {paymentMethod.id}
-      </div>
-      {/* <ResetButton onClick={reset} /> */}
-      <div>
-          make our own reset button or redirect to /route on the SPA
-      </div>
-    </div>
-  ) : (
-    <form className="Form" onSubmit={handleSubmit}>
-      <fieldset className="FormGroup">
-        <Field
-          label="Name"
-          id="name"
-          type="text"
-          placeholder="Jane Doe"
-          required
-          autoComplete="name"
-          value={billingDetails.name}
-          onChange={(e) => {
-            setBillingDetails({...billingDetails, name: e.target.value});
-          }}
-        />
-        <Field
-          label="Email"
-          id="email"
-          type="email"
-          placeholder="janedoe@gmail.com"
-          required
-          autoComplete="email"
-          value={billingDetails.email}
-          onChange={(e) => {
-            setBillingDetails({...billingDetails, email: e.target.value});
-          }}
-        />
-        <Field
-          label="Phone"
-          id="phone"
-          type="tel"
-          placeholder="(941) 555-0123"
-          required
-          autoComplete="tel"
-          value={billingDetails.phone}
-          onChange={(e) => {
-            setBillingDetails({...billingDetails, phone: e.target.value});
-          }}
-        />
-      </fieldset>
-      <fieldset className="FormGroup">
-        <CardField
-          onChange={(e) => {
-            setError(e.error);
-            setCardComplete(e.complete);
-          }}
-        />
-      </fieldset>
-      {error && <ErrorMessage>{error.message}</ErrorMessage>}
-      <SubmitButton processing={processing} error={error} disabled={!stripe}>
-        Pay $25
-      </SubmitButton>
-    </form>
-  );
-};
+  return (
+      paymentMethod ? (
+        <div className="Result">
+        <div className="ResultTitle" role="alert">
+            Payment successful
+        </div>
+        <div className="ResultMessage">
+            Thanks for trying Stripe Elements. No money was charged, but we
+            generated a PaymentMethod: {paymentMethod.id}
+        </div>
+        {/* <ResetButton onClick={reset} /> */}
+        <div>
+            make our own reset button or redirect to /route on the SPA
+        </div>
+        </div>
+    ) : (<>
+        <>
+            {
+                fetchedUser && fetchedUser.family_name && fetchedUser.given_name && fetchedUser?.user_metadata?.mobile ?
+                <>
+                    <>
+                        <br />
+                        {
+                            keepBillingDetails === true ?
+                            <>
+                                <div>Keeping current user billing info:</div>
+                                <br />
+                                <button
+                                onClick={() => setKeepBillingDetails(false)}
+                                >
+                                    Change Billing Info
+                                </button>
+                                <br />
+                                <br />
+                                {
+                                    fetchedUser ?
+                                    <>
+                                        <div>{fetchedUser?.given_name && fetchedUser?.family_name ? fetchedUser.given_name + ' ' + fetchedUser.family_name : 'no name set in profile'}</div>
+                                        <div>{fetchedUser?.email ? fetchedUser.email : ''}</div>
+                                        <div>{fetchedUser?.user_metadata?.mobile ? fetchedUser.user_metadata.mobile : 'no mobile number set in profile'}</div>
+                                    </>
+                                    : <></>
+                                }
+                            </>
+                            :
+                            <>
+                                <div></div>
+                                <button
+                                onClick={() => {
+                                    if (fetchedUser) {
+                                        setBillingDetails({
+                                            email: fetchedUser.email,
+                                            phone: fetchedUser.user_metadata?.mobile ? fetchedUser.user_metadata.mobile : '',
+                                            name: fetchedUser?.given_name && fetchedUser?.family_name ? fetchedUser.given_name + ' ' + fetchedUser.family_name : 'user'
+                                        })
+                                        setKeepBillingDetails(true)
+                                    }
+                                }}
+                                >
+                                    Cancel
+                                </button>
+                            </>
+                        }
+                    </>
+                    <div id='form-container'>
+                        <form className="Form" onSubmit={handleSubmit}>
+                            {
+                                keepBillingDetails === false ?
+                                <fieldset className="FormGroup">
+                                    <Field
+                                    label="Name"
+                                    id="name"
+                                    type="text"
+                                    placeholder="Jane Doe"
+                                    required
+                                    autoComplete="name"
+                                    value={billingDetails.name}
+                                    onChange={(e) => {
+                                        setBillingDetails({...billingDetails, name: e.target.value});
+                                    }}
+                                    />
+                                    <Field
+                                    label="Email"
+                                    id="email"
+                                    type="email"
+                                    placeholder="janedoe@gmail.com"
+                                    required
+                                    autoComplete="email"
+                                    value={billingDetails.email}
+                                    onChange={(e) => {
+                                        setBillingDetails({...billingDetails, email: e.target.value});
+                                    }}
+                                    />
+                                    <Field
+                                    label="Phone"
+                                    id="phone"
+                                    type="tel"
+                                    placeholder="(941) 555-0123"
+                                    required
+                                    autoComplete="tel"
+                                    value={billingDetails.phone}
+                                    onChange={(e) => {
+                                        setBillingDetails({...billingDetails, phone: e.target.value});
+                                    }}
+                                    />
+                                </fieldset>
+                                : <></>
+                            }
+                        <fieldset className="FormGroup">
+                            <CardField
+                            onChange={(e) => {
+                                setError(e.error);
+                                setCardComplete(e.complete);
+                            }}
+                            />
+                        </fieldset>
+                        {error && <ErrorMessage>{error.message}</ErrorMessage>}
+                        <SubmitButton processing={processing} error={error} disabled={!stripe}>
+                            Create Payment Method
+                        </SubmitButton>
+                        </form>
+                    </div>
+                </>
+                :
+                <>  
+                    {
+                        fetchedUser && isAuthenticated === true ?
+                            isLoading ?
+                            null
+                            :
+                            <>
+                                <br />
+                                <div>Please update your profile info with your full name and mobile phone before adding a payment method</div>
+                            </>
+                        : null
+                    }
+                </>
+            }
+        </>
+    </>)
+  )
+}
 
 const ELEMENTS_OPTIONS = {
   fonts: [

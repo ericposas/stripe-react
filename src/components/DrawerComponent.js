@@ -38,6 +38,7 @@ function DrawerLeftPanel ({ drawerOpen, setDrawerOpen }) {
             >
               Account
             </h4>
+
             <br />
             <Link to='/'>
               <StyledButton
@@ -48,6 +49,7 @@ function DrawerLeftPanel ({ drawerOpen, setDrawerOpen }) {
               </StyledButton>
             </Link>
             <br />
+            
             <br />
             <Link to='/update-profile'>
               <StyledButton
@@ -58,6 +60,18 @@ function DrawerLeftPanel ({ drawerOpen, setDrawerOpen }) {
               </StyledButton>
             </Link>
             <br />
+
+            <br />
+            <Link to='/setup-payment-method'>
+              <StyledButton
+              onClick={() => setDrawerOpen(false)}
+              style={{ backgroundColor: 'royalblue' }}
+              >
+                Save a Payment Method
+              </StyledButton>
+            </Link>
+            <br />
+            
             <br />
             <Link to='/checkout'>
               <StyledButton

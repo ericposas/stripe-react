@@ -1,4 +1,4 @@
-* {
+/* * {
   box-sizing: border-box;
 }
 
@@ -37,6 +37,14 @@ body {
   width: 500px;
   height: 400px;
   position: relative;
+} */
+
+#form-container {
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes fade {
@@ -52,16 +60,30 @@ body {
 
 .Form {
   animation: fade 200ms ease-out;
+  width: 75%;
+}
+
+.FormGroup > input,
+.FormGroup > button,
+.FormRow,
+.FormRowInput,
+.SubmitButton {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  border-style: none;
 }
 
 .FormGroup {
-  margin: 0 15px 20px;
+  margin: 25px 15px 20px;
   padding: 0;
   border-style: none;
-  background-color: #7795f8;
+  /* background-color: #7795f8; */
   will-change: opacity, transform;
   box-shadow: 0 6px 9px rgba(50, 50, 93, 0.06), 0 2px 5px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 #829fff;
+    inset 0 1px 0 rgba(0, 0, 0, 0.1);
+    /* #829fff; */
   border-radius: 4px;
 }
 
@@ -71,7 +93,8 @@ body {
   -ms-flex-align: center;
   align-items: center;
   margin-left: 15px;
-  border-top: 1px solid #819efc;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  /* border-top: 1px solid #819efc; */
 }
 
 .FormRow:first-child {
@@ -82,7 +105,7 @@ body {
   width: 15%;
   min-width: 70px;
   padding: 11px 0;
-  color: #c4f0ff;
+  color: #000;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -94,8 +117,10 @@ body {
     opacity: 1;
   }
 }
+
 .FormRowInput:-webkit-autofill {
-  -webkit-text-fill-color: #fce883;
+  -webkit-text-fill-color: forestgreen;
+  /* #fce883; */
   /* Hack to hide the default webkit autofill */
   transition: background-color 100000000s;
   animation: 1ms void-animation-out;
@@ -105,13 +130,14 @@ body {
   font-size: 16px;
   width: 100%;
   padding: 11px 15px 11px 0;
-  color: #fff;
+  color: #000;
   background-color: transparent;
   animation: 1ms void-animation-out;
 }
 
 .FormRowInput::placeholder {
-  color: #87bbfd;
+  /* color: #87bbfd; */
+  color: rgba(0, 0, 0, 0.25);
 }
 
 .StripeElement--webkit-autofill {
@@ -129,9 +155,9 @@ body {
   width: calc(100% - 30px);
   height: 40px;
   margin: 40px 15px 0;
-  background-color: #f6a4eb;
+  background-color: forestgreen;
   box-shadow: 0 6px 9px rgba(50, 50, 93, 0.06), 0 2px 5px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 #ffb9f6;
+    inset 0 1px 0 darkgreen;
   border-radius: 4px;
   color: #fff;
   font-weight: 600;
@@ -141,9 +167,9 @@ body {
 }
 
 .SubmitButton:active {
-  background-color: #d782d9;
+  background-color: darkgreen;
   box-shadow: 0 6px 9px rgba(50, 50, 93, 0.06), 0 2px 5px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 #e298d8;
+    inset 0 1px 0 black;
   transform: scale(0.99);
 }
 
@@ -157,15 +183,15 @@ body {
 .SubmitButton:disabled {
   opacity: 0.5;
   cursor: default;
-  background-color: #7795f8;
+  background-color: rgba(0, 0, 0, 0.25);
   box-shadow: none;
 }
 
 .ErrorMessage {
-  color: #fff;
+  color: red;
   position: absolute;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   padding: 0 15px;
   font-size: 13px;
   margin-top: 0px;
@@ -189,7 +215,7 @@ body {
 }
 
 .ResultTitle {
-  color: #fff;
+  color: #000;
   font-weight: 500;
   margin-bottom: 8px;
   font-size: 17px;
@@ -197,7 +223,7 @@ body {
 }
 
 .ResultMessage {
-  color: #9cdbff;
+  color: #000;
   font-size: 14px;
   font-weight: 400;
   margin-bottom: 25px;

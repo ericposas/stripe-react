@@ -4,12 +4,11 @@ import styled from 'styled-components'
 const StyledProductBoxDiv = styled.div`
 user-select: none;
 align-items: center;
-border: 2px solid slateblue;
-color: darkslateblue;
+box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.15);
 border-radius: 3px;
 padding: 20px;
 width: 300px;
-position: absolute;
+position: relative;
 margin: auto;
 left: 0;
 right: 0;
@@ -17,7 +16,7 @@ transform: scale(1.00);
 transition: all .35s;
 cursor: pointer;
 &:hover {
-    transform: scale(1.05);
+    transform: scale(1.025);
     transition: all .35s;
 }
 `

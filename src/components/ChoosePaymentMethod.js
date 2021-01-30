@@ -3,7 +3,7 @@ import useFetchedUserData from '../hooks/useFetchedUserData'
 import visaLogo from '../images/visa.png'
 import mastercardLogo from '../images/mastercard.png'
 
-export default function ChoosePaymentMethod () {
+export default function ChoosePaymentMethod ({ onPaymentMethodChosen }) {
 
     const fetchedUser = useFetchedUserData()
     const [paymentMethods, setPaymentMethods] = React.useState(null)
@@ -24,6 +24,9 @@ export default function ChoosePaymentMethod () {
 
     React.useEffect(() => {
         console.log(chosenPmtMethod)
+        if (onPaymentMethodChosen) {
+            onPaymentMethodChosen( chosenPmtMethod )
+        }
     }, [chosenPmtMethod])
 
     return <>
@@ -42,7 +45,7 @@ export default function ChoosePaymentMethod () {
                                 null
                         }
                     />
-                    : <div>no payment method selected</div>
+                    : null
                 }
                 <br />
                 {
@@ -56,7 +59,7 @@ export default function ChoosePaymentMethod () {
                             Payment Method ID: { chosenPmtMethod.id }
                         </div>
                     </>
-                    : null
+                    : <div>no payment method selected</div>
                 }
                 <br />
                 <select

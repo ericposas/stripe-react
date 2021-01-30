@@ -92,11 +92,15 @@ function App() {
                 <SuccessPage />
               </Route>
               
-              {/* <Route path='/checkout'>
+              <Route path='/checkout'>
                 <Checkout />
-              </Route> */}
+              </Route>
+              
+              <Route path='/checkout-confirm'>
 
-              <Route path='/checkout-payment-method'>
+              </Route>
+                            
+              {/* <Route path='/checkout-payment-method'>
                 <ChoosePaymentMethod />
               </Route>
               
@@ -106,7 +110,7 @@ function App() {
 
               <Route path='/checkout-success'>
 
-              </Route>
+              </Route> */}
 
               <Route path='/setup-payment-method'>
                 <Elements stripe={stripePromise}>

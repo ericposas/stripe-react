@@ -6,6 +6,7 @@ import ProductBox from './ProductBox'
 import { useAuth0 } from '@auth0/auth0-react'
 import useFetchedUserData from '../hooks/useFetchedUserData'
 import { useHistory } from 'react-router-dom'
+import ChoosePaymentMethod from './ChoosePaymentMethod'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
 
@@ -43,7 +44,7 @@ export default function Checkout () {
       }
       if (fetchedUser && shoppingCart.length > 0) {
         // next step, choose existing customer payment method
-        history.push('/checkout/payment-method')
+        history.push('/checkout-confirm')
 
       } else {
         console.log(
@@ -83,48 +84,7 @@ export default function Checkout () {
   
     }
 
-    const markup = () => (
-        <>
-        <br />
-        <div>
-          Enroll in Classes
-        </div>
-        <br />
-        <div>
-          {
-            products ?
-            products
-            .map(product => (
-              <ProductBox
-              itemsChecked={itemsChecked}
-              updateCart={updateCart}
-              product={product}
-              />
-            ))
-            : null
-          }
-        </div>
-        <br />
-        <div
-          style={{
-            left: 0,
-            right: 0,
-            bottom: '40px',
-            position: 'absolute',
-            margin: 'auto'
-          }}
-        >
-          <StyledButton
-          type='button' role='link'
-          onClick={handleClick}>
-            Next
-          </StyledButton>
-          <div>
-            (choose payment method)
-          </div>
-        </div>
-      </>
-    )
+    const [paymentMethodChosen, setPaymentMethodChosen] = React.useState(null)
     
     return (
         <>
@@ -132,8 +92,53 @@ export default function Checkout () {
             isLoading
             ? <><br/><div>Loading...</div></>
             :
-                isAuthenticated
-                ? markup()
+                fetchedUser && isAuthenticated ?
+                <>
+                  <br />
+                  <h3>
+                    Enroll in Classes
+                  </h3>
+                  <br />
+                  <div>
+                    {
+                      products ?
+                      products
+                      .map(product => (
+                        <ProductBox
+                        itemsChecked={itemsChecked}
+                        updateCart={updateCart}
+                        product={product}
+                        />
+                      ))
+                      : null
+                    }
+                  </div>
+                  <br />
+                  {
+                    shoppingCart.length > 0 ?
+                    <ChoosePaymentMethod
+                      onPaymentMethodChosen={(pmt) => { setPaymentMethodChosen(pmt) }}
+                    /> : null
+                  }
+                  <br />
+                  <div style={{ marginTop: '50px' }}></div>
+                  {
+                    shoppingCart.length > 0 && paymentMethodChosen ?
+                    <StyledButton
+                      style={{
+                        left: 0,
+                        right: 0,
+                        position: 'relative',
+                        margin: 'auto'
+                      }}
+                      type='button' role='link'
+                      onClick={handleClick}
+                    >
+                      Next
+                    </StyledButton>
+                    : null
+                  }
+                </>
                 : null
         }
         </>

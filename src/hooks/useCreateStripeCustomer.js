@@ -12,7 +12,7 @@ export default function useCreateStripeCustomer () {
 
     if (stripeCustomer) { // once we have both the stripeCustomer and jwt deps.. do..
       // patch stripe customer through to auth0 user 
-
+      
       console.log('stripe customer created')
 
       if (jwt) {

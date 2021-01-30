@@ -7,8 +7,8 @@ import StyledButton from './StyledButton'
 export default function ProfileDataPage () {
 
   const fetchedUserData = useFetchedUserData()
-  const { isLoading, isAuthenticated, user, loginWithPopup } = useAuth0()
-  // useCreateStripeCustomer()
+  const { isAuthenticated, user, loginWithPopup } = useAuth0()
+  useCreateStripeCustomer()
   
   const LoginButton = () => (
     <>
@@ -36,7 +36,7 @@ export default function ProfileDataPage () {
     </>
   )
 
-  const ProfileData = (fetchedUserData) => (
+  const ProfileData = () => (
     <>
       <h3>
         Welcome { fetchedUserData.given_name && fetchedUserData.family_name ? `${fetchedUserData.given_name} ${fetchedUserData.family_name}` : user.name }
@@ -49,7 +49,7 @@ export default function ProfileDataPage () {
         )
       }
       {
-        fetchedUserData.user_metadata && (
+        fetchedUserData.user_metadata?.mobile && (
           <h4>
             Phone number: { fetchedUserData.user_metadata.mobile ? fetchedUserData.user_metadata.mobile : null }
           </h4>
@@ -63,10 +63,9 @@ export default function ProfileDataPage () {
   return (
       <>
         <br />
-        {/* { isLoading ? <div>Loading...</div> : null } */}
         {
           isAuthenticated && user && fetchedUserData ?
-            ProfileData(fetchedUserData)
+            ProfileData()
           :
             <>
               {

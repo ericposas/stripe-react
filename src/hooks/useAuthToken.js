@@ -27,19 +27,14 @@ export default function useAuthToken () {
                     // request will be PATCH to update user 
                 })
                 .catch(err => console.log(err))
+            } else {
+                console.log(jwt)
+                setJwt(JSON.parse(localStorage.getItem('gym-app-jwt')))
             }
-            //  else {
-            //     console.log(
-            //         localStorage.getItem('gym-app-jwt')
-            //     )
-            //     setJwt(JSON.parse(localStorage.getItem('gym-app-jwt')))
-            // }
         }
 
-    }, [isAuthenticated, localStorage.getItem('gym-app-jwt')])
+    }, [isAuthenticated])
 
-    return JSON.parse(
-        localStorage.getItem('gym-app-jwt')
-    )
+    return jwt
 
 }

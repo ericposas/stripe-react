@@ -10,24 +10,11 @@ export default function ChoosePaymentMethod () {
     const [chosenPmtMethod, setChosenPmtMethod] = React.useState(null)
 
     React.useEffect(() => {
-        if (fetchedUser) {
-            console.log('should fire a request')
-            console.log('fetch should work')
-            fetch(`/get-payment-methods/${fetchedUser?.user_metadata?.stripe?.customer?.id}`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    stripe: fetchedUser?.user_metadata?.stripe
-                }),
-                headers: {
-                    'Content-type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data)
-                setPaymentMethods(data.paymentMethods)
-            })
-            .catch(err => console.log(err))
+        if (fetchedUser && fetchedUser?.user_metadata?.stripe?.paymentMethods) {
+            let { user_metadata: { stripe: { paymentMethods: pmts } } } = fetchedUser
+            setPaymentMethods(
+                Object.keys(pmts).map(key => pmts[key])
+            )
         }
     }, [fetchedUser])
 
@@ -62,10 +49,12 @@ export default function ChoosePaymentMethod () {
                     chosenPmtMethod ?
                     <>
                         <div>
-                            Selected payment method: &nbsp;
+                            Selected Payment Method: &nbsp;
                             <span>{ `${ chosenPmtMethod.card.brand }   *${ chosenPmtMethod.card.last4 }` }</span>
                         </div>
-                        <div>{ chosenPmtMethod.id }</div>
+                        <div style={{ fontSize: '11px', color: '#ccc' }}>
+                            Payment Method ID: { chosenPmtMethod.id }
+                        </div>
                     </>
                     : null
                 }
@@ -89,7 +78,11 @@ export default function ChoosePaymentMethod () {
                     }
                 </select>
             </>
-            : null
+            :
+            <>
+                <br />
+                <div>No payment methods have been set up</div>
+            </>
         }
     </>
 

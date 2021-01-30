@@ -10,6 +10,7 @@ import SuccessPage from './Success'
 import { useAuth0 } from '@auth0/auth0-react'
 import Checkout from './components/Checkout'
 import UpdateUserDataForm from './components/UpdateUserDataForm'
+import ChoosePaymentMethod from './components/ChoosePaymentMethod'
 import { DarkenDiv, DrawerLeftPanel } from './components/DrawerComponent'
 import { ActionModal } from './components/ActionModal'
 import AppHeader from './components/AppHeader'
@@ -82,20 +83,39 @@ function App() {
 
           <div>
             <Switch>
+              
               <Route exact path='/'>
                 <ProfileDataPage />
               </Route>
+              
               <Route path='/success'>
                 <SuccessPage />
               </Route>
-              <Route path='/checkout'>
+              
+              {/* <Route path='/checkout'>
                 <Checkout />
+              </Route> */}
+
+              <Route path='/checkout-payment-method'>
+                <ChoosePaymentMethod />
+                <div>Huh</div>
               </Route>
+              
+
+              <Route path='/checkout-review'>
+
+              </Route>
+
+              <Route path='/checkout-success'>
+
+              </Route>
+
               <Route path='/setup-payment-method'>
                 <Elements stripe={stripePromise}>
                   <StripeCardEntryExample />
                 </Elements>
               </Route>
+
               <Route path='/update-profile'>
                 <br />
                 <div>Update your info</div>
@@ -113,6 +133,7 @@ function App() {
                 submitLabel={ 'Update info' }
                 />
               </Route>
+
             </Switch>
           </div>
 

@@ -12,3 +12,5 @@ export const isGoogleAccount = (user) => {
     }
     return 'please include a "user" param'
 }
+
+export const gymApiUrl = 'https://gymwebapp.us.auth0.com/api/v2/users/'

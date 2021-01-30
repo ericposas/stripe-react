@@ -5,6 +5,7 @@ import StyledButton from './StyledButton'
 import ProductBox from './ProductBox'
 import { useAuth0 } from '@auth0/auth0-react'
 import useFetchedUserData from '../hooks/useFetchedUserData'
+import { useHistory } from 'react-router-dom'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
 
@@ -15,6 +16,7 @@ export default function Checkout () {
     const [shoppingCart, setShoppingCart] = React.useState([])
     const { isAuthenticated, isLoading } = useAuth0()
     const fetchedUser = useFetchedUserData()
+    const history = useHistory()
 
     React.useEffect(() => {
   
@@ -37,33 +39,12 @@ export default function Checkout () {
         console.log(
           'could not get auth0 fetched user object'
         )
+        return
       }
-      if (shoppingCart.length > 0) {
-        // Get Stripe.js instance
-        const stripe = await stripePromise
-        // Call your backend to create the Checkout Session
-        const response = await fetch('/create-checkout-session', {
-          method: 'POST',
-          body: JSON.stringify({
-            email: fetchedUser ? fetchedUser.email : null,
-            line_items: shoppingCart
-          }),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        const session = await response.json()
-        // When the customer clicks on the button, redirect them to the Checkout 
-        const result = await stripe.redirectToCheckout({
-          sessionId: session.id
-        })
-    
-        if (result.error) {
-          // If `redirectToCheckout` fails due to a browser or network
-          // error, display the localized error message to your customer
-          // using `result.error.message`.
-        }
-  
+      if (fetchedUser && shoppingCart.length > 0) {
+        // next step, choose existing customer payment method
+        history.push('/checkout/payment-method')
+
       } else {
         console.log(
           'there is nothing in your shopping cart'
@@ -124,18 +105,24 @@ export default function Checkout () {
           }
         </div>
         <br />
-        <StyledButton
-        style={{
-          left: 0,
-          right: 0,
-          bottom: '40px',
-          position: 'absolute',
-          margin: 'auto'
-        }}
-        type='button' role='link'
-        onClick={handleClick}>
-          Checkout
-        </StyledButton>
+        <div
+          style={{
+            left: 0,
+            right: 0,
+            bottom: '40px',
+            position: 'absolute',
+            margin: 'auto'
+          }}
+        >
+          <StyledButton
+          type='button' role='link'
+          onClick={handleClick}>
+            Next
+          </StyledButton>
+          <div>
+            (choose payment method)
+          </div>
+        </div>
       </>
     )
     

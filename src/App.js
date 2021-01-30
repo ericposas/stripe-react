@@ -48,6 +48,17 @@ function App() {
           <DrawerLeftPanel updatedProfile={updatedProfile} drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
           
           <ActionModal
+          queryTerm={'paymentMethodSetup'}
+          msg={'Payment method saved!'}
+          redirectPath={'/'}
+          timeout={3000}
+          delayBeforeLeave={2750}
+          doAction={() => {
+            setDrawerOpen(false)
+          }}
+          />
+
+          <ActionModal
           queryTerm={'profileSetup'}
           msg={'Thank you for completing your profile!'}
           redirectPath={'/'}

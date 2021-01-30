@@ -38,6 +38,8 @@ export default function ProfileDataPage () {
 
   const ProfileData = () => (
     <>
+      <br />
+      <br />
       <h3>
         Welcome { fetchedUserData.given_name && fetchedUserData.family_name ? `${fetchedUserData.given_name} ${fetchedUserData.family_name}` : user.name }
       </h3>
@@ -69,7 +71,7 @@ export default function ProfileDataPage () {
           :
             <>
               {
-                fetchedUserData && isAuthenticated === true
+                isAuthenticated
                 ? null
                 : LoginButton() 
               }

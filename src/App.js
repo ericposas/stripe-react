@@ -98,10 +98,8 @@ function App() {
 
               <Route path='/checkout-payment-method'>
                 <ChoosePaymentMethod />
-                <div>Huh</div>
               </Route>
               
-
               <Route path='/checkout-review'>
 
               </Route>

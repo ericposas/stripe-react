@@ -15,6 +15,19 @@ const StyledButton = styled.button`
         transition: all .35s;
         transform: scale(1.05);
     }
+    `
+    
+const GreyedOutButton = styled(StyledButton)`
+    background-color: #ccc;
+    &:hover {
+        background-color: #ccc;
+        transition: all .35s;
+        transform: scale(1.00);    
+    }
 `
 
 export default StyledButton
+
+export {
+    GreyedOutButton
+}

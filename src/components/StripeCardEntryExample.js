@@ -356,9 +356,18 @@ export default function StripeCardEntryExample () {
                             />
                         </fieldset>
                         {error && <ErrorMessage>{error.message}</ErrorMessage>}
-                        <SubmitButton processing={processing} error={error} disabled={!stripe}>
-                            Create Payment Method
-                        </SubmitButton>
+                        <div
+                        style={{
+                          width: '300px',
+                          position: 'absolute',
+                          left: 0, right: 0,
+                          margin: 'auto'
+                        }}
+                        >
+                          <SubmitButton processing={processing} error={error} disabled={!stripe}>
+                              Create Payment Method
+                          </SubmitButton>
+                        </div>
                         </form>
                     </div>
                 </>

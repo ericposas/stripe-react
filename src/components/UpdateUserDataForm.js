@@ -9,7 +9,7 @@ import { useHistory } from 'react-router-dom'
 import useFetchedUserData from '../hooks/useFetchedUserData'
 import { isEqual } from 'lodash'
 
-export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { queryKey, queryValue } }) {
+export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, submitLabel, onCompleteParams: { queryKey, queryValue } }) {
 
     const { user } = useAuth0()
     const history = useHistory()
@@ -80,6 +80,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                     setTimeout(() => {
                         history.push(`/?${queryKey}=${queryValue}`)
                     }, 250)
+                    setUpdatedProfile(true)
                 })
                 .catch(err => {
                     // should we do another fetch to invalidate the jwt here in
@@ -108,6 +109,36 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
         }
     }
 
+    // ?
+    const shouldRenderSubmitButton = () => {
+        
+        if (fetchedUserData) {
+
+            let object1 = {
+                firstName: firstNameField,
+                lastName: lastNameField,
+                mobile: phoneField,
+                email: emailField
+            }
+    
+            let object2 = {
+                firstName: fetchedUserData?.given_name,
+                lastName: fetchedUserData?.family_name,
+                mobile: fetchedUserData?.user_metadata?.mobile,
+                email: fetchedUserData?.email
+            }
+    
+            if (isEqual(object1, object2)) {
+                return false
+            }
+    
+            return true
+        }
+
+        return false
+        
+    }
+
 
     return (
         <>
@@ -121,6 +152,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                 )
             }
             <form
+            onClick={extraActionFn}
             style={{ height: user && isGoogleAccount(user) ? '110px' : '220px' }}
             className={'Success_form'}
             onSubmit={handleSubmit}>
@@ -133,6 +165,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                         onChange={(event) => {
                             setFirstNameField(event.target.value)
                         }}
+                        onFocus={extraActionFn}
                         value={firstNameField}
                         />
                         <div style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter a first name' }
@@ -143,6 +176,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                         <label htmlFor='last-name'>Last name: &nbsp;</label>
                         <input
                         id='last-name' type='text'
+                        onFocus={extraActionFn}
                         onChange={(event) => {
                             setLastNameField(event.target.value)
                         }}
@@ -162,6 +196,7 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                             <label htmlFor='phone'>Mobile number:</label>
                             <input
                             id='phone' type='tel'
+                            onFocus={extraActionFn}
                             value={phoneField}
                             onChange={(event) => {
                                 setPhoneField(event.target.value)
@@ -176,12 +211,13 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                 
                 {
                     (user && user.email) ?
-                        isGoogleAccount(user) ? ''
-                        :
-                        <>
+                    isGoogleAccount(user) ? ''
+                    :
+                    <>
                             <label htmlFor='email'>Email:</label>
                             <input
                             id='email' type='text'
+                            onFocus={extraActionFn}
                             value={emailField}
                             onChange={(event) => {
                                 setEmailField(event.target.value)
@@ -205,10 +241,14 @@ export default function UpdateUserDataForm ({ submitLabel, onCompleteParams: { q
                 {
                     user &&
                         (allFieldsValid() || (isGoogleAccount(user) && isPhone(phoneField))) ?
-                        <StyledButton
-                        type='submit' role='button'>
-                            { submitLabel }
-                        </StyledButton>
+                            shouldRenderSubmitButton()
+                            ?
+                                <StyledButton
+                                type='submit'
+                                role='button'>
+                                    { submitLabel }
+                                </StyledButton>
+                            : null
                         : null
                 }
             </form>

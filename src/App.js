@@ -26,6 +26,7 @@ function App() {
   
   const { user } = useAuth0()
   const [drawerOpen, setDrawerOpen] = React.useState(false)
+  const [updatedProfile, setUpdatedProfile] = React.useState(false)
 
   return (
     <>
@@ -44,8 +45,8 @@ function App() {
           </Link>
 
           <DarkenDiv drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
-          <DrawerLeftPanel drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
-
+          <DrawerLeftPanel updatedProfile={updatedProfile} drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
+          
           <ActionModal
           queryTerm={'profileSetup'}
           msg={'Thank you for completing your profile!'}
@@ -90,6 +91,10 @@ function App() {
                 <br />
                 <UpdateUserDataForm
                 user={user}
+                setUpdatedProfile={setUpdatedProfile}
+                extraActionFn={() => {
+                  setDrawerOpen(false)
+                }}
                 onCompleteParams={{
                   queryKey: 'updateInfo',
                   queryValue: 'complete'

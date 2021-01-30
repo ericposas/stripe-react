@@ -11,30 +11,35 @@ export default function useAuthToken () {
         'user auth: ', isAuthenticated
         )
         if (isAuthenticated === true) {
-        if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
-            fetch('/retrieve-api-token', {
-            method: 'POST',
-            headers: { 'Content-type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-            console.log(data)
-            setJwt(data)
-            localStorage.setItem('gym-app-jwt', JSON.stringify(data))
-            // we will update this to send the jwt to our mongo db for better security...
-            // we will then need to blacklist or invalidate old jwt tokens as well
-            // but for now, let's make a request using the jwt! (at Success component)
-            // request will be PATCH to update user 
-            })
-            .catch(err => console.log(err))
-        } else {
-            setJwt(JSON.parse(localStorage.getItem('gym-app-jwt')))
-        }
-        console.log(jwt)
+            if (window.localStorage && !localStorage.getItem('gym-app-jwt')) {
+                fetch('/retrieve-api-token', {
+                    method: 'POST',
+                    headers: { 'Content-type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    setJwt(data)
+                    localStorage.setItem('gym-app-jwt', JSON.stringify(data))
+                    // we will update this to send the jwt to our mongo db for better security...
+                    // we will then need to blacklist or invalidate old jwt tokens as well
+                    // but for now, let's make a request using the jwt! (at Success component)
+                    // request will be PATCH to update user 
+                })
+                .catch(err => console.log(err))
+            }
+            //  else {
+            //     console.log(
+            //         localStorage.getItem('gym-app-jwt')
+            //     )
+            //     setJwt(JSON.parse(localStorage.getItem('gym-app-jwt')))
+            // }
         }
 
-    }, [isAuthenticated])
+    }, [isAuthenticated, localStorage.getItem('gym-app-jwt')])
 
-    return jwt
+    return JSON.parse(
+        localStorage.getItem('gym-app-jwt')
+    )
 
 }

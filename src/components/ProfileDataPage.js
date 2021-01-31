@@ -39,7 +39,6 @@ export default function ProfileDataPage () {
   const ProfileData = () => (
     <>
       <br />
-      <br />
       <h3>
         Welcome { fetchedUserData.given_name && fetchedUserData.family_name ? `${fetchedUserData.given_name} ${fetchedUserData.family_name}` : user.name }
       </h3>
@@ -77,7 +76,7 @@ export default function ProfileDataPage () {
             )
           }
           {
-            fetchedUserData.user_metadata?.classes && (
+            fetchedUserData.user_metadata?.classes?.length > 0 && (
               <>
                 <h4>Courses</h4>
                 <div>

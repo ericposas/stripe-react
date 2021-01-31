@@ -166,12 +166,34 @@ export default function Checkout () {
             product.metadata.count
           )
           return parseInt(product?.metadata?.count)
+        } else {
+          return 0
         }
       })
+      console.log(
+        ptCount
+      )
       if (ptCount.length > 0) {
-        return ptCount.reduce((a, b) => a + b)
+        let addedUp = ptCount.reduce((a, b) => a + b)
+        return addedUp
       } else {
-        return 0
+        return ptCount[0]
+      }
+    }
+
+    const getClassList = () => {
+      let classes = shoppingCartMappedToProducts()
+      .map(_class => {
+        let matches = _class.name.match(/subscription/gi)
+        if (matches) {
+          return _class.name
+        }
+      })
+      
+      if (classes.length > 0) {
+        return classes
+      } else {
+        return []
       }
     }
     
@@ -179,6 +201,11 @@ export default function Checkout () {
       let { user_metadata } = fetchedUser
       let gym_purchases = user_metadata?.gym_purchases ? user_metadata.gym_purchases : []
       let pt_sessions = user_metadata?.pt_sessions ? user_metadata.pt_sessions : 0
+      let classes = user_metadata?.classes ? user_metadata.classes : []
+      console.log(
+        pt_sessions,
+        getPTSessions()
+      )
       return new Promise((resolve, reject) => {
         fetch(`${gymApiUrl}${fetchedUser.user_id}`, {
           method: 'PATCH',
@@ -191,7 +218,8 @@ export default function Checkout () {
               ],
               pt_sessions: (
                 getPTSessions() > 0 ? getPTSessions() + pt_sessions : pt_sessions
-              )
+              ),
+              classes: [ ...classes, ...getClassList() ]
             }
           }),
           headers: {

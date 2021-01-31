@@ -45,20 +45,58 @@ export default function ProfileDataPage () {
       </h3>
       {
         fetchedUserData.email && (
-          <h4>
+          <div>
             Email: { fetchedUserData.email }
-          </h4>
+          </div>
         )
       }
       {
         fetchedUserData.user_metadata?.mobile && (
-          <h4>
-            Phone number: { fetchedUserData.user_metadata.mobile ? fetchedUserData.user_metadata.mobile : null }
-          </h4>
+          <div>
+            Phone number: { fetchedUserData.user_metadata.mobile }
+          </div>
         )
       }
       <br />
       <br />
+      {
+        fetchedUserData?.user_metadata?.pt_sessions || fetchedUserData?.user_metadata?.classes
+        ? <h3>Enrolled in</h3>
+        : null
+      }
+      <div>
+        <div>
+          {
+            fetchedUserData.user_metadata?.pt_sessions > 0 && (
+              <>
+                <h4>Personal Training</h4>
+                <div>
+                  Training Sessions Available: { fetchedUserData.user_metadata.pt_sessions }
+                </div>
+              </>
+            )
+          }
+          {
+            fetchedUserData.user_metadata?.classes && (
+              <>
+                <h4>Courses</h4>
+                <div>
+                  {
+                    fetchedUserData.user_metadata.classes
+                    // .filter(_class => _class !== 'null')
+                    
+                    .map(_class => (
+                      <div key={_class}>
+                        { _class }
+                      </div>
+                    ))
+                  }
+                </div>
+              </>
+            )
+          }
+        </div>
+      </div>
     </>
   )
 

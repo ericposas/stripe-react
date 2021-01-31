@@ -31,14 +31,14 @@ export const convertToDollar = priceNum => {
     return dollarAmt
 }
 
-export default ({ product, itemsChecked, updateCart }) => (
+export default ({ altTag, product, itemsChecked, updateCart }) => (
     <>
         <StyledProductBoxDiv
         onClick={() => { updateCart(product) }}
         >
             <span>
                 <div key={product.id}>
-                { product.name }
+                { altTag ? altTag : product.name }
                 </div>
                 <div>
                 { product.statement_descriptor }

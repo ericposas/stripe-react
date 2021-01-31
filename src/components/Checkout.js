@@ -1,5 +1,5 @@
 import React from 'react'
-import { isEqual, reject } from 'lodash'
+import { includes, isEqual, reject } from 'lodash'
 import { loadStripe } from '@stripe/stripe-js'
 import StyledButton from './StyledButton'
 import ProductBox, { convertToDollar } from './ProductBox'
@@ -232,6 +232,17 @@ export default function Checkout () {
         .catch(err => { reject( err ) })
       })
     }
+
+    // const shouldAppShowSubscription = () => {
+    //   if (fetchedUser?.user_metadata?.classes) {
+    //     if (
+    //       includes(classes, 'Monthly Training Subscription')
+    //     ) {
+    //       return false
+    //     }
+    //   }
+    //   return true
+    // }
     
     return (
         <>
@@ -250,16 +261,34 @@ export default function Checkout () {
                     {
                       products ?
                       products
-                      .map(product => (
-                        <>
-                          <ProductBox
-                          itemsChecked={itemsChecked}
-                          updateCart={updateCart}
-                          product={product}
-                          />
-                          <br />
-                        </>
-                      ))
+                      .map(product => {
+                        if (fetchedUser?.user_metadata?.classes) {
+                          let { user_metadata: { classes } } = fetchedUser
+                          if (includes(classes, product.name)) {
+                            return <></>
+                          }
+                        }
+                        const getAltPTTag = () => {
+                          if (fetchedUser?.user_metadata?.pt_sessions &&
+                            product.name.match(/personal training/gi)) {
+                            let { user_metadata: { pt_sessions } } = fetchedUser
+                            return 'Add More Personal Training Sessions'
+                          } else {
+                            return null
+                          }
+                        }
+                        return (
+                          <>
+                            <ProductBox
+                            itemsChecked={itemsChecked}
+                            updateCart={updateCart}
+                            product={product}
+                            altTag={ getAltPTTag()}
+                            />
+                            <br />
+                          </>
+                        )
+                      })
                       : null
                     }
                   </div>

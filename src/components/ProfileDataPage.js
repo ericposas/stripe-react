@@ -83,8 +83,6 @@ export default function ProfileDataPage () {
                 <div>
                   {
                     fetchedUserData.user_metadata.classes
-                    // .filter(_class => _class !== 'null')
-                    
                     .map(_class => (
                       <div key={_class}>
                         { _class }

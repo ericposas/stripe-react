@@ -1,5 +1,5 @@
 import React from 'react'
-import { isEqual } from 'lodash'
+import { isEqual, reject } from 'lodash'
 import { loadStripe } from '@stripe/stripe-js'
 import StyledButton from './StyledButton'
 import ProductBox, { convertToDollar } from './ProductBox'
@@ -8,6 +8,8 @@ import useFetchedUserData from '../hooks/useFetchedUserData'
 import { useHistory } from 'react-router-dom'
 import ChoosePaymentMethod from './ChoosePaymentMethod'
 import { useStripe } from '@stripe/react-stripe-js'
+import { gymApiUrl } from '../utils/utils'
+import useAuthToken from '../hooks/useAuthToken'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
 
@@ -20,6 +22,7 @@ export default function Checkout () {
     const fetchedUser = useFetchedUserData()
     const history = useHistory()
     const stripe = useStripe()
+    const jwt = useAuthToken()
 
     React.useEffect(() => {
   
@@ -141,6 +144,66 @@ export default function Checkout () {
         )
       )
     )
+
+    const processPayment = () => {
+      return new Promise((resolve, reject) => {
+        stripe.confirmCardPayment(paymentIntentCreated.client_secret)
+        .then(response => {
+          resolve( response )
+        })
+        .catch(err => {
+          reject( err )
+        })
+      })
+    }
+
+    const getPTSessions = () => {
+      let ptCount = shoppingCartMappedToProducts()
+      .map(product => {
+        let matches = product.name.match(/personal training/gi)
+        if (matches) {
+          console.log(
+            product.metadata.count
+          )
+          return parseInt(product?.metadata?.count)
+        }
+      })
+      if (ptCount.length > 0) {
+        return ptCount.reduce((a, b) => a + b)
+      } else {
+        return 0
+      }
+    }
+    
+    const postToAuth0User = () => {
+      let { user_metadata } = fetchedUser
+      let gym_purchases = user_metadata?.gym_purchases ? user_metadata.gym_purchases : []
+      let pt_sessions = user_metadata?.pt_sessions ? user_metadata.pt_sessions : 0
+      return new Promise((resolve, reject) => {
+        fetch(`${gymApiUrl}${fetchedUser.user_id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            user_metadata: {
+              ...user_metadata,
+              gym_purchases: [
+                ...gym_purchases,
+                ...shoppingCartMappedToProducts()
+              ],
+              pt_sessions: (
+                getPTSessions() > 0 ? getPTSessions() + pt_sessions : pt_sessions
+              )
+            }
+          }),
+          headers: {
+            'Content-type': 'application/json',
+            'Authorization': `Bearer ${jwt.access_token}`
+          }
+        })
+        .then(response => response.json())
+        .then(res => { resolve( res ) })
+        .catch(err => { reject( err ) })
+      })
+    }
     
     return (
         <>
@@ -148,7 +211,7 @@ export default function Checkout () {
             isLoading
             ? <><br/><div>Loading...</div></>
             :
-                fetchedUser && isAuthenticated && !paymentIntentCreated ?
+                fetchedUser && jwt && isAuthenticated && !paymentIntentCreated ?
                 <>
                   <br />
                   <h3>
@@ -221,16 +284,25 @@ export default function Checkout () {
                           <div>{ successMsg }</div>
                           :
                           <StyledButton
-                          onClick={() => {
-                            stripe.confirmCardPayment(paymentIntentCreated.client_secret)
-                            .then(response => {
-                              setSuccessMsg( 'Payment Succeeded!' )
-                              history.push('/checkout/?paymentSucceeded=complete')
-                            })
-                            .catch(err => {
+                          onClick={async () => {
+                            try {
+                              let result = await processPayment()
+                              console.log(
+                                result
+                              )
+                              if (result.paymentIntent.status === 'succeeded') {
+                                let postResult = await postToAuth0User()
+                                if (postResult) {
+                                  setSuccessMsg( 'Payment Succeeded!' )
+                                  history.push('/checkout/?paymentSucceeded=complete')
+                                }
+                              }
+                            } catch (err) {
                               console.log(err)
                               setErrorMsg( err.message ? err.message : 'an error occurred processing your card' )
-                            })
+                              history.push('/checkout/?paymentFailed=error')
+                            }
+                            
                           }}
                           >
                             Confirm Payment

@@ -7,7 +7,7 @@ color: white;
 positon: absolute;
 padding: 10px 25px;
 border-radius: 3px;
-background-color: mediumseagreen;
+background-color: ${props => props.error ? 'red' : 'mediumseagreen' };
 box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.2);
 transform: translateX(-100vw);
 transition: transform .5s ease-out;
@@ -25,7 +25,8 @@ function ActionModal ({ doAction, msg, redirectPath, queryTerm, timeout, delayBe
   const history = useHistory()
   const [modal, setModal] = React.useState(false)
   const [slide, setSlide] = React.useState(null)
-  
+  const [error, setError] = React.useState(false)
+
   React.useEffect(() => {
     if (location) {
       let search = location.search.substr(1, location.search.length)
@@ -36,7 +37,10 @@ function ActionModal ({ doAction, msg, redirectPath, queryTerm, timeout, delayBe
         if (key && value) {
           console.log(key, value)
           if (key === queryTerm) {
-            if (value === 'complete') {
+            if (value === 'complete' || value === 'error') {
+              if (value === 'error') {
+                setError(true)
+              }
               setModal(true) // maybe replace this with react toast lib
               setTimeout(() => setSlide('in'), 50)
               setTimeout(() => {
@@ -61,7 +65,7 @@ function ActionModal ({ doAction, msg, redirectPath, queryTerm, timeout, delayBe
     {
       modal ?
         <>
-            <ModalDiv_SlideIn slide={ slide }>
+            <ModalDiv_SlideIn slide={ slide } error={ error }>
               {msg}
             </ModalDiv_SlideIn>
         </>

@@ -91,6 +91,17 @@ function App() {
             setDrawerOpen(false)
           }}
           />
+          
+          <ActionModal
+          queryTerm={'paymentFailed'}
+          msg={'There was an error, your payment method did not process'}
+          redirectPath={'/'}
+          timeout={3000}
+          delayBeforeLeave={2750}
+          doAction={() => {
+            setDrawerOpen(false)
+          }}
+          />
 
           <div>
             <Switch>

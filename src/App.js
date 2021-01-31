@@ -80,6 +80,17 @@ function App() {
             setDrawerOpen(false)
           }}
           />
+          
+          <ActionModal
+          queryTerm={'paymentSucceeded'}
+          msg={'Your payment has been processed successfully!'}
+          redirectPath={'/'}
+          timeout={3000}
+          delayBeforeLeave={2750}
+          doAction={() => {
+            setDrawerOpen(false)
+          }}
+          />
 
           <div>
             <Switch>
@@ -93,24 +104,10 @@ function App() {
               </Route>
               
               <Route path='/checkout'>
-                <Checkout />
+                <Elements stripe={stripePromise}>
+                  <Checkout />
+                </Elements>
               </Route>
-              
-              <Route path='/checkout-confirm'>
-
-              </Route>
-                            
-              {/* <Route path='/checkout-payment-method'>
-                <ChoosePaymentMethod />
-              </Route>
-              
-              <Route path='/checkout-review'>
-
-              </Route>
-
-              <Route path='/checkout-success'>
-
-              </Route> */}
 
               <Route path='/setup-payment-method'>
                 <Elements stripe={stripePromise}>

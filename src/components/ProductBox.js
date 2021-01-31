@@ -47,10 +47,7 @@ export default ({ product, itemsChecked, updateCart }) => (
                 ${ convertToDollar( product.metadata.price ) }
                 </div>
                 <input
-                style={{
-                    position: 'relative',
-                    right: '20px'
-                }}
+                style={{ position: 'absolute', right: '10px', bottom: '10px' }}
                 type='checkbox'
                 checked={itemsChecked[product.id]}
                 onChange={() => { updateCart(product) }}

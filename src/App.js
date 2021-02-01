@@ -127,9 +127,6 @@ function App() {
               </Route>
 
               <Route path='/update-profile'>
-                <br />
-                <div>Update your info</div>
-                <br />
                 <UpdateUserDataForm
                 user={user}
                 setUpdatedProfile={setUpdatedProfile}

@@ -151,6 +151,9 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
                     </>
                 )
             }
+            <br />
+            <h2 style={{ margin: 0 }}>Update your info</h2>
+            {/* <br /> */}
             <form
             onClick={extraActionFn}
             style={{ height: user && isGoogleAccount(user) ? '110px' : '220px' }}

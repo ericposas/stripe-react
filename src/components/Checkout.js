@@ -110,6 +110,7 @@ export default function Checkout () {
     const [paymentIntentCreated, setPaymentIntentCreated] = React.useState(null)
     const [errorMsg, setErrorMsg] = React.useState(null)
     const [successMsg, setSuccessMsg] = React.useState(null)
+    const [processingPayment, setProcessingPayment] = React.useState(null)
     
     const shoppingCartMappedToProducts = () => {
       let matches = []
@@ -236,26 +237,31 @@ export default function Checkout () {
     
     return (
         <>
-          <br/>
-          <RingLoader
-          css={{
-            position: 'absolute',
-            left: 0, right: 0,
-            margin: 'auto',
-          }}
-          size={ 50 }
-          color={ 'slateblue' }
-          loading={ fetchedUser ? false : true }
-          />
+        {
+          fetchedUser ? null
+          :
+            <>
+              <br />
+              <RingLoader
+              css={{
+                position: 'absolute',
+                left: 0, right: 0,
+                margin: 'auto',
+              }}
+              size={ 50 }
+              color={ 'slateblue' }
+              loading={ true }
+              />
+            </>
+        }
         {
           isLoading ? <></>
           :
               fetchedUser && jwt && isAuthenticated && !paymentIntentCreated ?
               <>
-                <br />
-                <h3>
+                <h2>
                   Enroll in Classes
-                </h3>
+                </h2>
                 <br />
                 <div>
                   {
@@ -324,24 +330,47 @@ export default function Checkout () {
                 {
                   shoppingCart.length > 0 ?
                   <>
-                    <h2>Confirm Payment Details</h2>
-                    <h4>Please confirm your details below and click "Confirm Payment" to complete your order</h4>
+                    <h2 style={{ color: processingPayment ? '#ccc' : '#000' }}>Confirm Payment Details</h2>
+                    <h4 style={{ color: processingPayment ? '#ccc' : '#000' }}>Please confirm your details below and click "Confirm Payment" to complete your order</h4>
                     <br />
                     <div>
-                      <div>
+                      <div style={{ color: processingPayment ? '#ccc' : '#000' }}>
                         Products: { cartItemsDescriptions() }
                       </div>
                       <br />
-                      <div>
+                      <div style={{ color: processingPayment ? '#ccc' : '#000' }}>
                         Total: { cartItemsCost() }
                       </div>
                       <br />
                       {
                         successMsg ?
                         <div>{ successMsg }</div>
+                        : null
+                      }
+                      {
+                        processingPayment ?
+                        <>
+                          <br />
+                          <RingLoader
+                          css={{
+                            position: 'absolute',
+                            left: 0, right: 0,
+                            margin: 'auto',
+                          }}
+                          size={ 50 }
+                          color={ 'slateblue' }
+                          loading={ true }
+                          />
+                          <br />
+                          <br />
+                          <br />
+                          <br />
+                          <div style={{ fontSize: '13px' }}>Processing your payment, please do not close your browser until it completes!</div>
+                        </>
                         :
                         <StyledButton
                         onClick={async () => {
+                          setProcessingPayment( true )
                           try {
                             let result = await processPayment()
                             console.log(
@@ -359,7 +388,6 @@ export default function Checkout () {
                             setErrorMsg( err.message ? err.message : 'an error occurred processing your card' )
                             history.push('/checkout/?paymentFailed=error')
                           }
-                          
                         }}
                         >
                           Confirm Payment

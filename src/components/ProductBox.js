@@ -43,6 +43,7 @@ export default ({ altTag, product, itemsChecked, updateCart }) => (
                 <div>
                 { product.statement_descriptor }
                 </div>
+                <br />
                 <div>
                 ${ convertToDollar( product.metadata.price ) }
                 </div>

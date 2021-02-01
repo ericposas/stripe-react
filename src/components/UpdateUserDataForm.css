@@ -9,7 +9,8 @@
     right: 0;
     border-radius: 3px;
     border: 1px solid #ccc;
-    font-family: 'Courier New', Courier, monospace;
+    box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.15);
+    /* font-family: 'Courier New', Courier, monospace; */
 }
 
 .Success_form > div {
@@ -23,7 +24,7 @@
     width: 200px;
     position: absolute;
     right: 170px;
-    font-family: 'Courier New', Courier, monospace;
+    /* font-family: 'Courier New', Courier, monospace; */
 }
 
 .Success_form > label {

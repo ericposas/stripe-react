@@ -228,13 +228,8 @@ export default function StripeCardEntryExample () {
   }
 
   return (
-      paymentMethod ? (
-        <div className="Result">
-          <div className="ResultTitle" role="alert">
-          </div>
-        </div>
-      ) : (
-      <>
+    <>
+      <h2>Enter a Payment Method</h2>
         <>
             {
                 fetchedUser && fetchedUser.family_name && fetchedUser.given_name && fetchedUser?.user_metadata?.mobile ?
@@ -244,9 +239,9 @@ export default function StripeCardEntryExample () {
                         {
                             keepBillingDetails === true ?
                             <>
-                                <div>Keeping current user billing info:</div>
-                                <br />
+                                <div style={{ display: 'inline-block' }}>Keeping current user billing info:</div>
                                 <button
+                                style={{ display: 'inline-block', marginLeft: '10px' }}
                                 onClick={() => setKeepBillingDetails(false)}
                                 >
                                     Change Billing Info
@@ -379,7 +374,6 @@ export default function StripeCardEntryExample () {
             }
         </>
     </>
-    )
   )
 }
 

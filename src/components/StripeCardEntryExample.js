@@ -1,12 +1,12 @@
 import React, {useState} from 'react'
-import { CardElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import './2-Card-Detailed.css'
 import useFetchedUserData from '../hooks/useFetchedUserData'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useHistory } from 'react-router-dom'
-import { set } from 'lodash'
 import { gymApiUrl } from '../utils/utils'
 import useAuthToken from '../hooks/useAuthToken'
+import { RingLoader } from 'react-spinners'
 
 const CARD_OPTIONS = {
   iconStyle: 'solid',
@@ -108,38 +108,7 @@ export default function StripeCardEntryExample () {
   })
   const [keepBillingDetails, setKeepBillingDetails] = useState(true)
   const history = useHistory()
-  const [pmtMethodResult, setPmtMethodResult] = useState(null)
   const jwt = useAuthToken()
-
-  // React.useEffect(() => {
-
-  //   console.log('useEffect pmtMeth firing', pmtMethodResult)
-
-  //   if (pmtMethodResult && fetchedUser && jwt) {
-  //     // once payment method is attached, get result and post to auth0 user
-  //     fetch(`${gymApiUrl}${fetchedUser.user_id}`, {
-  //       method: 'PATCH',
-  //       body: JSON.stringify({
-  //         user_metadata: {
-  //           stripe: {
-  //             paymentMethods: {
-  //               pmtMethodResult
-  //             }
-  //           }
-  //         }
-  //       }),
-  //       headers: {
-  //           'content-type': 'application/json',
-  //           'authorization': `Bearer ${jwt.access_token}`
-  //       }
-  //     })
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       console.log('saved payment data to auth0 user', data)
-  //     })
-  //     .catch(err => console.log(err))
-  //   }
-  // }, [pmtMethodResult])
 
   const patchPaymentMethodData = (data) => {
     let { user_metadata: { stripe } } = fetchedUser
@@ -383,19 +352,30 @@ export default function StripeCardEntryExample () {
                     </div>
                 </>
                 :
-                <>  
-                    {
-                        fetchedUser && isAuthenticated === true ?
-                            isLoading ?
-                            null
-                            :
-                            <>
-                                <br />
-                                <div>Please update your profile info with your full name and mobile phone before adding a payment method</div>
-                            </>
-                        : null
-                    }
-                </>
+                <>
+                  <br />
+                  <RingLoader
+                  css={{
+                    position: 'absolute',
+                    left: 0, right: 0,
+                    margin: 'auto',
+                  }}
+                  size={ 50 }
+                  color={ 'slateblue' }
+                  loading={ fetchedUser ? false : true }
+                  />
+                  {
+                      fetchedUser && isAuthenticated === true ?
+                          isLoading ?
+                          null
+                          :
+                          <>
+                              <br />
+                              <div>Please update your profile info with your full name and mobile phone before adding a payment method</div>
+                          </>
+                      : null
+                  }
+              </>
             }
         </>
     </>

@@ -10,6 +10,7 @@ import ChoosePaymentMethod from './ChoosePaymentMethod'
 import { useStripe } from '@stripe/react-stripe-js'
 import { gymApiUrl } from '../utils/utils'
 import useAuthToken from '../hooks/useAuthToken'
+import { PacmanLoader, ClimbingBoxLoader, RingLoader } from 'react-spinners'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
 
@@ -232,150 +233,149 @@ export default function Checkout () {
         .catch(err => { reject( err ) })
       })
     }
-
-    // const shouldAppShowSubscription = () => {
-    //   if (fetchedUser?.user_metadata?.classes) {
-    //     if (
-    //       includes(classes, 'Monthly Training Subscription')
-    //     ) {
-    //       return false
-    //     }
-    //   }
-    //   return true
-    // }
     
     return (
         <>
+          <br/>
+          <RingLoader
+          css={{
+            position: 'absolute',
+            left: 0, right: 0,
+            margin: 'auto',
+          }}
+          size={ 50 }
+          color={ 'slateblue' }
+          loading={ fetchedUser ? false : true }
+          />
         {
-            isLoading
-            ? <><br/><div>Loading...</div></>
-            :
-                fetchedUser && jwt && isAuthenticated && !paymentIntentCreated ?
-                <>
-                  <br />
-                  <h3>
-                    Enroll in Classes
-                  </h3>
-                  <br />
-                  <div>
-                    {
-                      products ?
-                      products
-                      .map(product => {
-                        if (fetchedUser?.user_metadata?.classes) {
-                          let { user_metadata: { classes } } = fetchedUser
-                          if (includes(classes, product.name)) {
-                            return <></>
-                          }
-                        }
-                        const getAltPTTag = () => {
-                          if (fetchedUser?.user_metadata?.pt_sessions &&
-                            product.name.match(/personal training/gi)) {
-                            let { user_metadata: { pt_sessions } } = fetchedUser
-                            return 'Add More Personal Training Sessions'
-                          } else {
-                            return null
-                          }
-                        }
-                        return (
-                          <>
-                            <ProductBox
-                            itemsChecked={itemsChecked}
-                            updateCart={updateCart}
-                            product={product}
-                            altTag={ getAltPTTag()}
-                            />
-                            <br />
-                          </>
-                        )
-                      })
-                      : null
-                    }
-                  </div>
-                  <br />
+          isLoading ? <></>
+          :
+              fetchedUser && jwt && isAuthenticated && !paymentIntentCreated ?
+              <>
+                <br />
+                <h3>
+                  Enroll in Classes
+                </h3>
+                <br />
+                <div>
                   {
-                    shoppingCart.length > 0 ?
-                    <ChoosePaymentMethod
-                      onPaymentMethodChosen={(pmt) => { setPaymentMethodChosen(pmt) }}
-                    /> : null
-                  }
-                  <br />
-                  <div style={{ marginTop: '50px' }}></div>
-                  {
-                    shoppingCart.length > 0 && paymentMethodChosen ?
-                    <StyledButton
-                      style={{
-                        left: 0,
-                        right: 0,
-                        position: 'relative',
-                        margin: 'auto'
-                      }}
-                      type='button' role='link'
-                      onClick={handleClick}
-                    >
-                      Next
-                    </StyledButton>
+                    products ?
+                    products
+                    .map(product => {
+                      if (fetchedUser?.user_metadata?.classes) {
+                        let { user_metadata: { classes } } = fetchedUser
+                        if (includes(classes, product.name)) {
+                          return <></>
+                        }
+                      }
+                      const getAltPTTag = () => {
+                        if (fetchedUser?.user_metadata?.pt_sessions &&
+                          product.name.match(/personal training/gi)) {
+                          let { user_metadata: { pt_sessions } } = fetchedUser
+                          return 'Add More Personal Training Sessions'
+                        } else {
+                          return null
+                        }
+                      }
+                      return (
+                        <>
+                          <ProductBox
+                          itemsChecked={itemsChecked}
+                          updateCart={updateCart}
+                          product={product}
+                          altTag={ getAltPTTag()}
+                          />
+                          <br />
+                        </>
+                      )
+                    })
                     : null
                   }
-                </>
-                :
-                // if payment intent created, confirm the payment details
-                <>
-                  {
-                    shoppingCart.length > 0 ?
-                    <>
-                      <h2>Confirm Payment Details</h2>
-                      <h4>Please confirm your details below and click "Confirm Payment" to complete your order</h4>
+                </div>
+                <br />
+                {
+                  shoppingCart.length > 0 ?
+                  <ChoosePaymentMethod
+                    onPaymentMethodChosen={(pmt) => { setPaymentMethodChosen(pmt) }}
+                  /> : null
+                }
+                <br />
+                <div style={{ marginTop: '50px' }}></div>
+                {
+                  shoppingCart.length > 0 && paymentMethodChosen ?
+                  <StyledButton
+                    style={{
+                      left: 0,
+                      right: 0,
+                      position: 'relative',
+                      margin: 'auto'
+                    }}
+                    type='button' role='link'
+                    onClick={handleClick}
+                  >
+                    Next
+                  </StyledButton>
+                  : null
+                }
+              </>
+              :
+              // if payment intent created, confirm the payment details
+              <>
+                {
+                  shoppingCart.length > 0 ?
+                  <>
+                    <h2>Confirm Payment Details</h2>
+                    <h4>Please confirm your details below and click "Confirm Payment" to complete your order</h4>
+                    <br />
+                    <div>
+                      <div>
+                        Products: { cartItemsDescriptions() }
+                      </div>
                       <br />
                       <div>
-                        <div>
-                          Products: { cartItemsDescriptions() }
-                        </div>
-                        <br />
-                        <div>
-                          Total: { cartItemsCost() }
-                        </div>
-                        <br />
-                        {
-                          successMsg ?
-                          <div>{ successMsg }</div>
-                          :
-                          <StyledButton
-                          onClick={async () => {
-                            try {
-                              let result = await processPayment()
-                              console.log(
-                                result
-                              )
-                              if (result.paymentIntent.status === 'succeeded') {
-                                let postResult = await postToAuth0User()
-                                if (postResult) {
-                                  setSuccessMsg( 'Payment Succeeded!' )
-                                  history.push('/checkout/?paymentSucceeded=complete')
-                                }
-                              }
-                            } catch (err) {
-                              console.log(err)
-                              setErrorMsg( err.message ? err.message : 'an error occurred processing your card' )
-                              history.push('/checkout/?paymentFailed=error')
-                            }
-                            
-                          }}
-                          >
-                            Confirm Payment
-                          </StyledButton>
-                        }
-                        {
-                          errorMsg ?
-                          <div>{ errorMsg }</div>
-                          : null
-                        }
+                        Total: { cartItemsCost() }
                       </div>
-                    </>
-                    : null
-                  }
-                </>
-        }
-        </>
+                      <br />
+                      {
+                        successMsg ?
+                        <div>{ successMsg }</div>
+                        :
+                        <StyledButton
+                        onClick={async () => {
+                          try {
+                            let result = await processPayment()
+                            console.log(
+                              result
+                            )
+                            if (result.paymentIntent.status === 'succeeded') {
+                              let postResult = await postToAuth0User()
+                              if (postResult) {
+                                setSuccessMsg( 'Payment Succeeded!' )
+                                history.push('/checkout/?paymentSucceeded=complete')
+                              }
+                            }
+                          } catch (err) {
+                            console.log(err)
+                            setErrorMsg( err.message ? err.message : 'an error occurred processing your card' )
+                            history.push('/checkout/?paymentFailed=error')
+                          }
+                          
+                        }}
+                        >
+                          Confirm Payment
+                        </StyledButton>
+                      }
+                      {
+                        errorMsg ?
+                        <div>{ errorMsg }</div>
+                        : null
+                      }
+                    </div>
+                  </>
+                  : null
+                }
+              </>
+      }
+      </>
     )
 }

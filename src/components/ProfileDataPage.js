@@ -3,11 +3,12 @@ import useFetchedUserData from '../hooks/useFetchedUserData'
 import useCreateStripeCustomer from '../hooks/useCreateStripeCustomer'
 import { useAuth0 } from '@auth0/auth0-react'
 import StyledButton from './StyledButton'
+import { RingLoader } from 'react-spinners'
 
 export default function ProfileDataPage () {
 
   const fetchedUserData = useFetchedUserData()
-  const { isAuthenticated, user, loginWithPopup } = useAuth0()
+  const { isAuthenticated, user, loginWithPopup, isLoading } = useAuth0()
   useCreateStripeCustomer()
   
   const LoginButton = () => (
@@ -108,7 +109,22 @@ export default function ProfileDataPage () {
               {
                 isAuthenticated
                 ? null
-                : LoginButton() 
+                :
+                  isLoading ?
+                    <>
+                      <RingLoader
+                      css={{
+                        position: 'absolute',
+                        left: 0, right: 0,
+                        margin: 'auto',
+                      }}
+                      size={ 50 }
+                      color={ 'slateblue' }
+                      loading={ fetchedUserData ? false : true }
+                      />
+                    </>
+                  :
+                    LoginButton() 
               }
             </>
         }

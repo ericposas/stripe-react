@@ -8,6 +8,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { useHistory } from 'react-router-dom'
 import useFetchedUserData from '../hooks/useFetchedUserData'
 import { isEqual } from 'lodash'
+import useAuthToken from '../hooks/useAuthToken'
 
 export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, submitLabel, onCompleteParams: { queryKey, queryValue } }) {
 
@@ -19,6 +20,8 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
     const [emailField, setEmailField] = React.useState('')
     const [phoneField, setPhoneField] = React.useState('')
     const isPhone = (num) => (new awesomePhonenumber(num, 'US').isValid())
+    const jwt = useAuthToken()
+    const { logout } = useAuth0()
     
     React.useEffect(() => {
         if (user && fetchedUserData) {
@@ -43,64 +46,101 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
         }
     }
 
-    const handleSubmit = (event) => {
-        event.preventDefault()
-        if ((allFieldsValid() || (isGoogleAccount(user) && isPhone(phoneField))) && localStorage.getItem('gym-app-jwt')) {
-            let jwt = JSON.parse(localStorage.getItem('gym-app-jwt'))['access_token']
-            let bodyShape = {
-                user_metadata: {
-                    mobile: phoneField
-                },
+    const getPostBodyShape = () => {
+        let bodyShape = {
+            user_metadata: {
+                mobile: phoneField
+            },
+        }
+        if (!isGoogleAccount(user)) {
+            bodyShape.given_name = firstNameField
+            bodyShape.family_name = lastNameField
+            if (emailField !== user.email) {
+                bodyShape.email = emailField
             }
-            if (!isGoogleAccount(user)) {
-                bodyShape.given_name = firstNameField
-                bodyShape.family_name = lastNameField
-                if (emailField !== user.email) {
-                    bodyShape.email = emailField
-                }
-                // bodyShape.email = emailField //-- email field triggers an auto-logout bc auth0 needs to reverify credentials
-            }
-            if (localStorage.getItem('gym-app-jwt')) {
-                let status, statusCode
-                fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.sub}`, {
+        }
+        return bodyShape
+    }
+
+    // posts user data to stripe account
+    const postUserDataToStripeAcct = async () => (
+        new Promise(async (resolve, reject) => {
+            try {
+                let response = await fetch('/update-user-data-to-stripe', {
                     method: 'PATCH',
-                    body: JSON.stringify(bodyShape),
-                    headers: { 'content-type': 'application/json', 'authorization': `Bearer ${jwt}` }
+                    body: JSON.stringify({
+                        userData: {
+                            name: firstNameField && lastNameField ? firstNameField + ' ' + lastNameField : null,
+                            email: emailField ? emailField : null,
+                            phone: phoneField ? phoneField : null
+                        },
+                        customer: fetchedUserData?.user_metadata?.stripe?.customer?.id
+                    }),
+                    headers: { 'Content-type': 'application/json' }
                 })
-                .then(response => {
-                    console.log(
-                        response
-                    )
-                    status = response.status
-                    return response.json()
-                })
-                .then(data => {
-                    console.log(data)
-                    statusCode = data.statusCode ? data.statusCode : null
-                    setTimeout(() => {
-                        history.push(`/?${queryKey}=${queryValue}`)
-                    }, 250)
-                    setUpdatedProfile(true)
-                })
-                .catch(err => {
-                    // should we do another fetch to invalidate the jwt here in
-                    // the case of a 401 error?
-                    if (status === 401 || statusCode === 401) {
-                        if (localStorage.getItem('gym-app-jwt')) {
-                            localStorage.removeItem('gym-app-jwt')
-                        }
-                        console.log(
-                            `Bad token, need to make a call to invalidate it
-                            and subsequently clear jwt from localStorage or db,
-                            wherever we have saved it`
-                        )
-                        console.log(`
-                            alternatively, we can just make sure that we delete
-                            the jwt from localStorage or database once the user
-                            logs out
-                        `)
+                let data = await response.json()
+                console.log( data )
+                resolve( data )
+            } catch (err) {
+                console.log(err)
+                reject( err )
+            }
+        })
+    )
+
+    // posts user data to auth user
+    const postUserDataToAuthUser = () => (
+        new Promise((resolve, reject) => {
+            let status, statusCode
+            let bodyShape = getPostBodyShape()
+            fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.sub}`, {
+                method: 'PATCH',
+                body: JSON.stringify(bodyShape),
+                headers: {
+                    'content-type': 'application/json',
+                    'authorization': `Bearer ${jwt?.access_token}`
+                }
+            })
+            .then(response => {
+                status = response.status
+                return response.json()
+            })
+            .then(data => {
+                statusCode = data.statusCode ? data.statusCode : null
+                setTimeout(() => {
+                    history.push(`/?${queryKey}=${queryValue}`)
+                }, 250)
+                setUpdatedProfile(true)
+                resolve( data )
+            })
+            .catch(err => {
+                // the case of a 401 error?
+                // delete token and logout
+                resolve( err )
+                if (status === 401 || statusCode === 401) {
+                    if (localStorage.getItem('gym-app-jwt')) {
+                        localStorage.removeItem('gym-app-jwt')
+                        logout({ redirectTo: window.location.origin })
                     }
-                })
+                }
+            })
+        })
+    )
+        
+    
+
+    const handleSubmit = async (event) => {
+        event.preventDefault()
+        if ((allFieldsValid() || (isGoogleAccount(user) && isPhone(phoneField))) && jwt) {
+            // let jwt = JSON.parse(localStorage.getItem('gym-app-jwt'))['access_token']
+            if (jwt) {
+                try {
+                    let postToStripe = await postUserDataToStripeAcct()
+                    let postToAuth = await postUserDataToAuthUser()
+                    console.log( 'user data posted to apis', postToAuth, postToStripe )
+                } catch (err) {
+                    console.log('an error occurred in posting to apis', err)
+                }
             }
         } else {
             console.log(

@@ -4,10 +4,10 @@ import useAuthToken from './useAuthToken'
 
 export default function useCreateStripeCustomer () {
   
-  const { user } = useAuth0()
+  const { user, logout } = useAuth0()
   const [stripeCustomer, setStripeCustomer] = React.useState(null)
   const jwt = useAuthToken()
-
+  
   React.useEffect(() => {
 
     if (stripeCustomer) { // once we have both the stripeCustomer and jwt deps.. do..
@@ -45,6 +45,7 @@ export default function useCreateStripeCustomer () {
             if (status === 401 || statusCode === 401) {
               if (localStorage.getItem('gym-app-jwt')) {
                 localStorage.removeItem('gym-app-jwt')
+                logout({ redirectTo: window.location.origin })
               }
             }
         })

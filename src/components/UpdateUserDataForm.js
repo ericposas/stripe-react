@@ -193,39 +193,41 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
             }
             <br />
             <h2 style={{ margin: 0 }}>Update your info</h2>
-            {/* <br /> */}
             <form
+            style={{ width: allFieldsValid() ? '330px' : '450px' }}
             onClick={extraActionFn}
-            style={{ height: user && isGoogleAccount(user) ? '110px' : '220px' }}
             className={'Success_form'}
-            onSubmit={handleSubmit}>
+            onSubmit={handleSubmit}
+            >
+                <div
+                style={{ width: allFieldsValid() ? '330px' : '450px' }}
+                className='form-container-div'
+                >
                 {
                     user && user.sub && !isGoogleAccount(user) ?
                     <>
                         <label htmlFor='first-name'>First name: &nbsp;</label>
                         <input
+                        style={ allFieldsValid() ? { right: '20px' } : { left: 0, right: 0, } }
                         id='first-name' type='text'
-                        onChange={(event) => {
-                            setFirstNameField(event.target.value)
-                        }}
+                        onChange={(event) => { setFirstNameField(event.target.value) }}
                         onFocus={extraActionFn}
                         value={firstNameField}
                         />
-                        <div style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter a first name' }
+                        <div className='form-error-div' style={{ color: 'red' }} >{ !validator.isEmpty(firstNameField) ? null : 'enter first name' }
                         </div>
                         <br />
                         <br />
 
                         <label htmlFor='last-name'>Last name: &nbsp;</label>
                         <input
+                        style={ allFieldsValid() ? { right: '20px' } : { left: 0, right: 0, } }
                         id='last-name' type='text'
                         onFocus={extraActionFn}
-                        onChange={(event) => {
-                            setLastNameField(event.target.value)
-                        }}
+                        onChange={(event) => { setLastNameField(event.target.value) }}
                         value={lastNameField}
                         />
-                        <div style={{ color: 'red' }} >{ !validator.isEmpty(lastNameField) ? null : 'enter a last name' }
+                        <div className='form-error-div' style={{ color: 'red' }} >{ !validator.isEmpty(lastNameField) ? null : 'enter last name' }
                         </div>
                         <br />
                         <br />
@@ -236,22 +238,20 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
                 {
                     user && (
                         <>
-                            <label htmlFor='phone'>Mobile number:</label>
+                            <label htmlFor='phone'>Mobile:</label>
                             <input
+                            style={ allFieldsValid() ? { right: '20px' } : { left: 0, right: 0, } }
                             id='phone' type='tel'
                             onFocus={extraActionFn}
                             value={phoneField}
-                            onChange={(event) => {
-                                setPhoneField(event.target.value)
-                            }}
+                            onChange={(event) => { setPhoneField(event.target.value) }}
                             />
-                            <div style={{ color: 'red' }} > { isPhone(phoneField) ? null : 'enter a valid number' }</div>
+                            <div className='form-error-div' style={{ color: 'red' }} > { isPhone(phoneField) ? null : 'invalid number' }</div>
                             <br />
                             <br />
                         </>
                     )
                 }
-                
                 {
                     (user && user.email) ?
                     isGoogleAccount(user) ? ''
@@ -259,6 +259,7 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
                     <>
                             <label htmlFor='email'>Email:</label>
                             <input
+                            style={ allFieldsValid() ? { right: '20px' } : { left: 0, right: 0, } }
                             id='email' type='text'
                             onFocus={extraActionFn}
                             value={emailField}
@@ -266,12 +267,12 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
                                 setEmailField(event.target.value)
                             }}
                             />
-                            <div style={{ color: validator.isEmail(emailField) ? 'green' : 'red' }} >
+                            <div className='form-error-div' style={{ color: validator.isEmail(emailField) ? 'green' : 'red' }} >
                                 {
                                     !isEqual(emailField, user.email) ?
                                         validator.isEmail(emailField) ?
-                                        'requires sign in upon change'
-                                        : 'not a valid email'
+                                        'requires sign-in'
+                                        : 'invalid email'
                                     : ''
                                 }
                             </div>
@@ -280,6 +281,7 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
                         </>
                     : 'no user data'
                 }
+                </div>
                 <br />
                 {
                     user &&
@@ -288,7 +290,12 @@ export default function UpdateUserDataForm ({ setUpdatedProfile, extraActionFn, 
                             ?
                                 <StyledButton
                                 type='submit'
-                                role='button'>
+                                role='button'
+                                style={{
+                                    position: 'relative',
+                                    margin: 0,
+                                    left: 0, right: 0,
+                                }}>
                                     { submitLabel }
                                 </StyledButton>
                             : null

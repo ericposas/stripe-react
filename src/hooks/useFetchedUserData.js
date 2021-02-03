@@ -12,7 +12,7 @@ export default function useFetchedUserData () {
     
     if (user && jwt) {
       let status, statusCode
-      fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.sub}`, {
+      fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.user_id ? user.user_id : user.sub}`, {
           method: 'GET',
           headers: { 'authorization': `Bearer ${jwt.access_token}` }
       })

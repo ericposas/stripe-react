@@ -103,6 +103,17 @@ function App() {
             setDrawerOpen(false)
           }}
           />
+          
+          <ActionModal
+          queryTerm={'updatedAddress'}
+          msg={'Successfully updated address info!'}
+          redirectPath={'/update-address'}
+          timeout={3000}
+          delayBeforeLeave={2750}
+          doAction={() => {
+            setDrawerOpen(false)
+          }}
+          />
 
           <div>
             <Switch>
@@ -127,7 +138,7 @@ function App() {
                 </Elements>
               </Route>
 
-              <Route path='/address-input'>
+              <Route path='/update-address'>
                 <AddressInputBox />
               </Route>
 

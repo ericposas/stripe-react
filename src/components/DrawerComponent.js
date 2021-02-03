@@ -81,6 +81,17 @@ function DrawerLeftPanel ({ updatedProfile, drawerOpen, setDrawerOpen }) {
             </StyledButton>
           </Link>
           <br />
+          
+          <br />
+          <Link to='/update-address'>
+            <StyledButton
+            onClick={() => setDrawerOpen(false)}
+            style={{ backgroundColor: 'royalblue' }}
+            >
+              Add / Update address
+            </StyledButton>
+          </Link>
+          <br />
 
           <br />
           <Link to='/setup-payment-method'>

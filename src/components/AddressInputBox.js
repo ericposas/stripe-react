@@ -2,6 +2,7 @@ import React from 'react'
 import validator, { isEmpty, isLength, isNumeric } from 'validator'
 import { includes } from 'lodash'
 import './AddressInputBox.css'
+import StyledButton from './StyledButton'
 
 export function InputFieldErr ({ validators }) {
 
@@ -49,7 +50,7 @@ export default function AddressInputBox () {
     .concat(cityValidators)
     .concat(stateValidators)
     .concat(zipValidators)
-    
+
     const allFieldsValid = () => {
         if (includes(validatorsArray, false)) {
             return false
@@ -67,6 +68,8 @@ export default function AddressInputBox () {
                 className='Address_form'
                 onSubmit={(event) => {
                     event.preventDefault()
+                    console.log( 'write submit logic here' )
+
                 }}
                 >
                     <br />
@@ -129,7 +132,25 @@ export default function AddressInputBox () {
                     />
                     <br />
                     <br />
-                    
+
+                    {
+                        allFieldsValid() ?
+                        <>
+                            <br />
+                            <StyledButton
+                            role='submit'
+                            style={{
+                                position: 'relative'
+                            }}
+                            >
+                                Submit
+                            </StyledButton>
+                            <br />
+                            <br />
+                        </>
+                        : <></>
+                    }
+
                 </form>
             </div>
         </>

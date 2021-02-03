@@ -18,7 +18,7 @@ export default function useCreateStripeCustomer () {
       if (jwt) {
         
         let status, statusCode
-        fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.sub}`, {
+        fetch(`https://gymwebapp.us.auth0.com/api/v2/users/${user.user_id ? user.user_id : user.sub}`, {
             method: 'PATCH',
             body: JSON.stringify({
               user_metadata: {
@@ -65,12 +65,16 @@ export default function useCreateStripeCustomer () {
 
       console.log('hook should create stripe customer')
 
+      let bodyData = {
+        email: user.email
+      }
+      if (user.given_name && user.family_name) {
+        bodyData.name = `${user.given_name} ${user.family_name}`
+      }
+
       fetch('/create-stripe-customer', {
         method: 'POST',
-        body: JSON.stringify({
-          // email: user.email ? user.email : user.name
-          email: user.email
-        }),
+        body: JSON.stringify(bodyData),
         headers: {
           'Content-type': 'application/json'
         }

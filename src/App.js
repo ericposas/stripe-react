@@ -20,6 +20,7 @@ import LogoutTimer from './components/LogoutTimer'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import StripeCardEntryExample from './components/StripeCardEntryExample'
+import AddressInputBox from './components/AddressInputBox'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_TEST_PUB_KEY)
 
@@ -124,6 +125,10 @@ function App() {
                 <Elements stripe={stripePromise}>
                   <StripeCardEntryExample />
                 </Elements>
+              </Route>
+
+              <Route path='/address-input'>
+                <AddressInputBox />
               </Route>
 
               <Route path='/update-profile'>

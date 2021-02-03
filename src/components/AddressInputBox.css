@@ -1,0 +1,45 @@
+.address-form-container-div {
+    position: absolute;
+    margin: auto;
+    width: 400px;
+    /* height: 400px; */
+    left: 0; right: 0;
+    border-radius: 5px;
+    box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.Address_form > .address-form-container-div {
+    position: relative;
+    /* height: 400px; */
+}
+
+.Address_form > .address-input-group > label {
+    position: absolute;
+    line-height: 30px;
+    margin: auto;
+    left: 20px;
+}
+
+.Address_form > .address-input-group > input {
+    border: none;
+    border-radius: 5px;
+    position: absolute;
+    margin: auto;
+    height: 24px;
+    left: 100px;
+    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.Address_form > .address-input-group > input:focus {
+    outline: none !important;
+    border: none;
+    box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.15);
+}
+
+.Address_form > .address-error-msg {
+    position: absolute;
+    margin: auto;
+    right: 20px;
+    line-height: 30px;
+    font-size: 10px;
+}

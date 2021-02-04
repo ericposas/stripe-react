@@ -1,7 +1,7 @@
 import React from 'react'
 import { includes, isEqual, reject } from 'lodash'
 import { loadStripe } from '@stripe/stripe-js'
-import StyledButton from './StyledButton'
+import StyledButton, { GreyedOutButton } from './StyledButton'
 import ProductBox, { convertToDollar } from './ProductBox'
 import { useAuth0 } from '@auth0/auth0-react'
 import useFetchedUserData from '../hooks/useFetchedUserData'
@@ -24,6 +24,8 @@ export default function Checkout () {
     const history = useHistory()
     const stripe = useStripe()
     const jwt = useAuthToken()
+    const [subData, setSubData] = React.useState(null)
+    const [settingUpPaymentIntent, setSettingUpPaymentIntent] = React.useState(false)
 
     React.useEffect(() => {
   
@@ -38,7 +40,7 @@ export default function Checkout () {
       
     }, [])
     
-    const handleClick = async event => {
+    const handleClick = (event) => {
       if (!fetchedUser) {
         console.log(
           'could not get auth0 fetched user object'
@@ -48,7 +50,8 @@ export default function Checkout () {
       if (fetchedUser && shoppingCart.length > 0) {
         // next step, choose existing customer payment method
         // history.push('/checkout-confirm')
-        fetch('/process-payment-for-classes', {
+        setSettingUpPaymentIntent( true )
+        fetch('/setup-payment-for-classes', {
           method: 'POST',
           body: JSON.stringify({
             shoppingCart,
@@ -59,11 +62,12 @@ export default function Checkout () {
             'Content-type': 'application/json'
           }
         })
-        .then(response => response.json())
-        .then(data => {
-          console.log(data)
+        .then((result) => result.json())
+        .then((data) => {
+          console.log( 'after payment setup', data )
+          setSubData( data.subscriptionsData )
           setPaymentIntentCreated( data )
-          // history.push('/checkout-confirm')
+          setSettingUpPaymentIntent( false )
         })
         .catch(err => console.log(err))
 
@@ -112,6 +116,7 @@ export default function Checkout () {
     const [successMsg, setSuccessMsg] = React.useState(null)
     const [processingPayment, setProcessingPayment] = React.useState(null)
     
+    // Note: Need to manually set price_id, price, and count (if applicable) metadata in Stripe dashboard
     const shoppingCartMappedToProducts = () => {
       let matches = []
       shoppingCart.forEach(item => {
@@ -234,6 +239,38 @@ export default function Checkout () {
         .catch(err => { reject( err ) })
       })
     }
+
+    const processSubscriptions = async (data) => {
+      try {
+        let response = await fetch('/process-subscriptions', {
+          method: 'post',
+          body: JSON.stringify(data),
+          headers: {'content-type':'application/json'}
+        })
+        let resolved = await response.json()
+        return resolved
+      } catch (err) {
+        console.log( err )
+      }
+    }
+
+    const hasSubscriptions = () => {
+      let subs = shoppingCartMappedToProducts()
+      .filter(item => item.description.match(/subscription/gi))
+      if (subs.length > 0) {
+        return true
+      }
+      return false
+    }
+
+    const hasOneTimeCharges = () => {
+      let charges = shoppingCartMappedToProducts()
+      .filter(item => item.description.match(/personal training/gi))
+      if (charges.length > 0) {
+        return true
+      }
+      return false
+    }
     
     return (
         <>
@@ -309,18 +346,32 @@ export default function Checkout () {
                 <div style={{ marginTop: '50px' }}></div>
                 {
                   shoppingCart.length > 0 && paymentMethodChosen ?
-                  <StyledButton
+                    settingUpPaymentIntent ?
+                    <GreyedOutButton
                     style={{
                       left: 0,
                       right: 0,
                       position: 'relative',
-                      margin: 'auto'
+                      margin: 'auto',
                     }}
-                    type='button' role='link'
-                    onClick={handleClick}
-                  >
-                    Next
-                  </StyledButton>
+                    type='button'
+                    role='link'>
+                      Setting up...
+                    </GreyedOutButton>
+                    :
+                    <StyledButton
+                      style={{
+                        left: 0,
+                        right: 0,
+                        position: 'relative',
+                        margin: 'auto',
+                      }}
+                      type='button'
+                      role='link'
+                      onClick={handleClick}
+                    >
+                      Next
+                    </StyledButton>
                   : null
                 }
               </>
@@ -372,11 +423,28 @@ export default function Checkout () {
                         onClick={async () => {
                           setProcessingPayment( true )
                           try {
-                            let result = await processPayment()
-                            console.log(
-                              result
-                            )
-                            if (result.paymentIntent.status === 'succeeded') {
+                            let result, subscriptionsResponse
+                            if (hasOneTimeCharges() === true) {
+                              result = await processPayment()
+                              console.log('run if user has one-time charges like pt training')
+                            }
+                            if (hasSubscriptions() === true) {
+                              console.log('run if user has subscriptions')
+                              subscriptionsResponse = await processSubscriptions( subData )
+                              console.log(
+                                'subscriptions res: ', subscriptionsResponse
+                              )
+                              // if (result.subscriptions !== false) {
+                              // }
+                            }
+                            // let { subscriptionsData: data } = result
+                            // console.log(
+                            //   'after processing payment', result
+                            // )
+                            // now, process subscriptions
+                            // let subscriptionsResponse
+
+                            if (result?.paymentIntent?.status === 'succeeded' || subscriptionsResponse?.status === 'active') {
                               let postResult = await postToAuth0User()
                               if (postResult) {
                                 setSuccessMsg( 'Payment Succeeded!' )
